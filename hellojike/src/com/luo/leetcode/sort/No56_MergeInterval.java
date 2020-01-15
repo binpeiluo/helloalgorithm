@@ -1,7 +1,8 @@
 package com.luo.leetcode.sort;
 
 /*
-给出一个区间的集合，请合并所有重叠的区间。
+    56. 合并区间
+    给出一个区间的集合，请合并所有重叠的区间。
 
         示例 1:
 
@@ -27,6 +28,9 @@ public class No56_MergeInterval {
      * 思路是
      *      先将每个区间按大小排序
      *      然后判断合并区间
+     *
+     * 时间复杂度:nlogn  主要在排序
+     * 空间复杂度:n
      * @param intervals
      * @return
      */
