@@ -60,12 +60,12 @@ public class BinSearch {
     public static void main(String[] args) {
         BinSearch search = new BinSearch();
         int arraySize = 10;
-        int bounds = ;
+        int bounds = 5;
         int target = 3;
         int[] ints = CommonUtil.generateArray(arraySize, bounds);
         Arrays.sort(ints);
 
-//        int eleIndex = search.binSearch(ints, target);
+        int eleIndex = search.binSearch(ints, target);
 //        int eleIndex = search.leftBound(ints, target);
         BinSearch.printMessage(ints, target, eleIndex);
     }

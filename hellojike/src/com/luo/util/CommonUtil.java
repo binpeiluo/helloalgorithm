@@ -48,6 +48,18 @@ public class CommonUtil {
         System.out.println();
     }
 
+    public static void display(int[][] a){
+        System.out.println("数组长度:"+a.length);
+        for(int[] n:a){
+            for(int b:n){
+                System.out.print("\t"+b);
+            }
+            System.out.println();
+        }
+        System.out.println();
+
+    }
+
     public static int[] generateArray(int len,int bounds,boolean negetive){
         int[] res=new int[len];
         for(int i=0;i<len;i++){
