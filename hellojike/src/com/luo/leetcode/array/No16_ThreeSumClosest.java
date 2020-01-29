@@ -23,7 +23,7 @@ public class No16_ThreeSumClosest {
      * @return
      */
     public int threeSumClosest(int[] nums, int target) {
-        int result=Integer.MAX_VALUE;
+        int result=nums[0]+nums[1]+nums[2];
         Arrays.sort(nums);
         for (int i = 0; i < nums.length-2; i++) {
             int lo=i+1,hi=nums.length-1;
