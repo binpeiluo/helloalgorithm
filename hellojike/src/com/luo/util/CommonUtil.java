@@ -57,7 +57,17 @@ public class CommonUtil {
             System.out.println();
         }
         System.out.println();
+    }
 
+    public static void display(char[][] cs){
+        System.out.println("数组长度:"+cs.length);
+        for(char[] n:cs){
+            for(char b:n){
+                System.out.print("\t"+b);
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 
     public static int[] generateArray(int len,int bounds,boolean negetive){
