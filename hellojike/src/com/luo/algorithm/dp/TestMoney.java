@@ -47,6 +47,37 @@ public class TestMoney {
     }
 
     /**
+     * 使用备忘录的动态规划算法
+     * @param coins
+     * @param sum
+     * @return
+     */
+    public int coinChange3(int[] coins,int sum){
+//        明确状态  原问题和子问题之间不同的状态是凑齐的金额
+//        明确dp数组\函数定义,凑齐金额i至少需要dp[i]个硬币
+//        明确选择并且择优,状态转移
+//        明确base case
+        int[] dp=new int[sum+1];
+        for(int i=0;i<dp.length;i++){
+            dp[i]=-1;
+        }
+//        base case
+        dp[0]=0;
+        for (int i = 0; i < dp.length; i++) {
+            int res=Integer.MAX_VALUE;
+            for (int coin:coins){
+                if(i-coin>=0&&dp[i-coin]!=-1){
+                    int sub=dp[i-coin];
+                    res=Math.min(res,sub+1);
+                }
+            }
+            if(res!=Integer.MAX_VALUE)
+                dp[i]=res;
+        }
+        return dp[sum];
+    }
+
+    /**
      * 这种问题也可以使用回溯解决
      * 回溯适合找出所有可能
      * @param moneys
@@ -88,12 +119,15 @@ public class TestMoney {
 
     public static void main(String[] args){
         TestMoney test=new TestMoney();
-        int[] moneys={2,4,6};
-        int sum=11;
+        int[] moneys={1,2,5};
+        int sum=35;
         int i = test.coinChange(moneys, sum);
         System.out.println(i);
 
         int i1 = test.coinChange2(moneys, sum);
         System.out.println(i1);
+
+        int i2 = test.coinChange3(moneys, sum);
+        System.out.println(i2);
     }
 }
