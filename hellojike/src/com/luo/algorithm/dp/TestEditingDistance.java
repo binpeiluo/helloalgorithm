@@ -34,13 +34,41 @@ public class TestEditingDistance {
             else
                 return dp(str1,i-1,str2,j-1);
         }else{
-            int res=Math.max(i,j);
+            if(j==0&&i==0)
+                return 1;
+            int res=Integer.MAX_VALUE;
             if(j-1>=0)
                 res=Math.min(res,dp(str1,i,str2,j-1));
             if(i-1>=0)
                 res=Math.min(res,dp(str1,i-1,str2,j));
+            if(i-1>=0&&j-1>=0)
+                res=Math.min(res,dp(str1,i-1,str2,j-1));
             return res+1;
         }
+    }
+
+    public int editingDistance2(String str1,String str2){
+//        明确dp函数定义,str1的前i个字符和str2的前j个字符的编辑距离为dp[i][j]
+        int m=str1.length(),n=str2.length();
+        int[][] dp=new int[m+1][n+1];
+//        base case
+        for(int i=0;i<m;i++)
+            dp[i][0]=i;
+        for(int i=0;i<n;i++)
+            dp[0][i]=i;
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <=n; j++) {
+                if(str1.charAt(i-1)==str2.charAt(j-1)){
+                    dp[i][j]=dp[i-1][j-1];
+                }else{
+                    int min=Math.min(dp[i][j-1],dp[i-1][j]);
+                    min=Math.min(min,dp[i-1][j-1]);
+                    dp[i][j]=min+1;
+                }
+            }
+        }
+        return dp[m][n];
+
     }
 
     public static void main(String[] args){
@@ -49,5 +77,8 @@ public class TestEditingDistance {
         String str2="execution";
         int i = test.editingDistance(str1, str2);
         System.out.println(i);
+
+        int i1 = test.editingDistance2(str1, str2);
+        System.out.println(i1);
     }
 }
