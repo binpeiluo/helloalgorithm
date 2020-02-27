@@ -88,12 +88,41 @@ public class No33_Search {
         return -1;
     }
 
+    public int search3(int[] nums,int target){
+        if(nums==null||nums.length<1)
+            return -1;
+        int left=0,right=nums.length-1;
+        while(left<=right){
+            int mid=left+(right-left)/2;
+            if(nums[mid]==target)
+                return mid;
+            if(nums[left]<=nums[mid]){//前边有序 当区间比较小时,left=mid
+                if(nums[left]<=target&&target<nums[mid]){//在前边,
+                    // 当nums[left]==target时,需要将指针right移动到mid-1,而left保持不变
+                    right=mid-1;
+                }else{//在后边
+                    left=mid+1;
+                }
+            }else{//后边有序,
+                if(nums[mid]<target&&target<=nums[right]){//在后边,当nums[right]==target时,
+//                    需要将left指针移动到mid+1,right保持不变
+                    left=mid+1;
+                }else{//在前边
+                    right=mid-1;
+                }
+            }
+        }
+        return -1;
+    }
 
     public static void main(String[] args){
         No33_Search test=new No33_Search();
         int[] nums={4,5,6,7,0,1,2};
-        int target=3;
+        int target=0;
         int i = test.search2(nums, target);
         System.out.println(i);
+
+        int i1 = test.search3(nums, target);
+        System.out.println(i1);
     }
 }
