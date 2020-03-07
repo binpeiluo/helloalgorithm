@@ -99,6 +99,17 @@ public class CommonUtil {
         }
     }
 
+    public static int min(int a,int b,int c){
+        int min=Math.min(a,b);
+        min=Math.min(min,c);
+        return min;
+    }
+    public static int max(int a,int b,int c){
+        int max=Math.max(a,b);
+        max=Math.max(max,c);
+        return max;
+    }
+
     public static void main(String[] args){
         int[] ints = generateArray(10, 5, true);
         display(ints);
