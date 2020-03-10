@@ -41,10 +41,10 @@ public class TestUnionFind {
 //            优化树的不平衡性问题,本来这里的时间复杂度最高为O(n),优化后可为O(logn)
             if(height[rootP]<height[rootQ]){
                 parent[rootP]=rootQ;
-                height[rootP]++;
+                height[rootQ]+=height[rootP];
             }else{
                 parent[rootQ]=rootP;
-                height[rootQ]++;
+                height[rootP]+=height[rootQ];
             }
             count--;
         }
