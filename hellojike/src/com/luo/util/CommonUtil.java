@@ -110,6 +110,64 @@ public class CommonUtil {
         return max;
     }
 
+    public static class TreeNode{
+        public TreeNode left;
+        public TreeNode right;
+        public int val;
+        TreeNode(int val,TreeNode left,TreeNode right){
+            this.val=val;
+            this.left=left;
+            this.right=right;
+        }
+        TreeNode(int val){
+            this.val=val;
+        }
+
+        @Override
+        public String toString() {
+            return "TreeNode{" +
+                    "left=" + left +
+                    ", right=" + right +
+                    ", val=" + val +
+                    '}';
+        }
+    }
+
+    /**
+     * 生成二叉树 方便计算.忽略第一个节点
+     * @param valuas
+     * @return
+     */
+    public static TreeNode generateNodeMissing(Integer[] valuas){
+        int len=valuas.length;
+        TreeNode[] nodes=new TreeNode[len];
+        for (int i = 0; i < len; i++) {
+            if(valuas[i]!=null)
+                nodes[i]=new TreeNode(valuas[i]);
+        }
+        for (int i = 1; i < len / 2; i++) {
+            if(nodes[i]!=null){
+                nodes[i].left=nodes[2*i];
+                nodes[i].right=nodes[2*i+1];
+            }
+        }
+        return nodes[1];
+    }
+
+    /**
+     * 生成二叉树节点,不忽略首位置
+     * @param valuas
+     * @return
+     */
+    public static TreeNode generateNode(Integer[] valuas){
+        Integer[] after=new Integer[valuas.length+1];
+        for (int i = 1; i < after.length; i++) {
+            after[i]=valuas[i-1];
+        }
+        return generateNodeMissing(after);
+    }
+
+
     public static void main(String[] args){
         int[] ints = generateArray(10, 5, true);
         display(ints);
