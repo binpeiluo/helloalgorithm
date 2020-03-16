@@ -1,5 +1,7 @@
 package com.luo.labuladong.mind.dp;
 
+import com.luo.util.CommonUtil;
+
 /**
  *  递归思维
  *
@@ -22,7 +24,7 @@ public class TestPathSum {
      * @param sum
      * @return
      */
-    public int pathSum(TreeNode root,int sum){
+    public int pathSum(CommonUtil.TreeNode root, int sum){
         if(root==null)
             return 0;
 //        首先计算以自己为起点的路径的情况
@@ -39,7 +41,7 @@ public class TestPathSum {
      * @param sum
      * @return
      */
-    private int count(TreeNode root,int sum){
+    private int count(CommonUtil.TreeNode root, int sum){
         if(root==null)
             return 0;
         int leftCount=count(root.left,sum-root.val);
@@ -47,54 +49,16 @@ public class TestPathSum {
         return (sum==root.val?1:0)+leftCount+rightCount;
     }
 
-    static class TreeNode{
-        TreeNode left;
-        TreeNode right;
-        int val;
-        TreeNode(int val,TreeNode left,TreeNode right){
-            this.val=val;
-            this.left=left;
-            this.right=right;
-        }
-        TreeNode(int val){
-            this.val=val;
-        }
-
-        @Override
-        public String toString() {
-            return "TreeNode{" +
-                    "left=" + left +
-                    ", right=" + right +
-                    ", val=" + val +
-                    '}';
-        }
-    }
-
 
     public static void main(String[] args){
         TestPathSum test=new TestPathSum();
 //        TreeNode 的值列表,忽略第一个值
         Integer[] nodeValues={null,1,2,3,4,5,6,7,8};
-        TreeNode root = generateNode(nodeValues);
+        CommonUtil.TreeNode root = CommonUtil.generateNode(nodeValues);
 //        System.out.println(root);
         int i = test.pathSum(root,7);
         System.out.println(i);
 
     }
 
-    private static TreeNode generateNode(Integer[] valuas){
-        int len=valuas.length;
-        TreeNode[] nodes=new TreeNode[len];
-        for (int i = 0; i < len; i++) {
-            if(valuas[i]!=null)
-                nodes[i]=new TreeNode(valuas[i]);
-        }
-        for (int i = 1; i < len / 2; i++) {
-            if(nodes[i]!=null){
-                nodes[i].left=nodes[2*i];
-                nodes[i].right=nodes[2*i+1];
-            }
-        }
-        return nodes[1];
-    }
 }
