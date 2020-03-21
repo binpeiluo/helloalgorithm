@@ -126,9 +126,9 @@ public class CommonUtil {
         @Override
         public String toString() {
             return "TreeNode{" +
-                    "left=" + left +
+                    "val=" + val +
+                    ", left=" + left +
                     ", right=" + right +
-                    ", val=" + val +
                     '}';
         }
     }
