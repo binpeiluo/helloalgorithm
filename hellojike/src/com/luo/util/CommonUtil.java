@@ -167,6 +167,36 @@ public class CommonUtil {
         return generateNodeMissing(after);
     }
 
+    public static class ListNode{
+        public int val;
+        public ListNode next;
+        public ListNode(int val){
+            this.val=val;
+        }
+
+        @Override
+        public String toString() {
+            return "ListNode{" +
+                    "val=" + val +
+                    ", next=" + next +
+                    '}';
+        }
+    }
+
+    public static ListNode generateListNode(int[] nums){
+        int len=nums.length;
+        if(len==1)
+            return new ListNode(nums[0]);
+        ListNode[] list=new ListNode[len];
+        for(int i=0;i<len;i++){
+            list[i]=new ListNode(nums[i]);
+        }
+        for (int i = 0; i < len - 1; i++) {
+            list[i].next=list[i+1];
+        }
+        return list[0];
+
+    }
 
     public static void main(String[] args){
         int[] ints = generateArray(10, 5, true);

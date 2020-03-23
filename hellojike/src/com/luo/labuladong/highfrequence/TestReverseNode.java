@@ -1,6 +1,6 @@
 package com.luo.labuladong.highfrequence;
 
-
+import static com.luo.util.CommonUtil.*;
 /**
  * 高频题目
  * k个一组反转链表
@@ -119,7 +119,7 @@ public class TestReverseNode {
     public static void main(String[] args){
         TestReverseNode test=new TestReverseNode();
         int[] nums={1,2,3,4,5};
-        ListNode node = generate(nums);
+        ListNode node = generateListNode(nums);
 //        System.out.println(node.toString());
 
         ListNode reverse = test.reverse(node);
@@ -138,39 +138,4 @@ public class TestReverseNode {
         System.out.println(node3);
     }
 
-    private static ListNode generate(int[] nums){
-        int len=nums.length;
-        ListNode[] nodes=new ListNode[len];
-        for (int i = 0; i < len; i++) {
-            nodes[i]=new ListNode(nums[i]);
-        }
-        for (int i = 0; i < len - 1; i++) {
-            nodes[i].next=nodes[i+1];
-        }
-        return nodes[0];
-    }
-
-
-    //     * Definition for singly-linked list.
-    static class ListNode {
-        int val;
-        ListNode next;
-
-        ListNode(int x) {
-            val = x;
-        }
-
-        ListNode(int val, ListNode next) {
-            this.val = val;
-            this.next = next;
-        }
-
-        @Override
-        public String toString() {
-            return "ListNode{" +
-                    "val=" + val +
-                    ", next=" + next +
-                    '}';
-        }
-    }
 }
