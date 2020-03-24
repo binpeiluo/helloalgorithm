@@ -1,5 +1,6 @@
 package com.luo.algorithm.recurse;
 
+import static com.luo.util.CommonUtil.*;
 /**
  * 递归之反转链表一部分
  */
@@ -97,10 +98,4 @@ public class RecurseList {
         test.printListNode(head);
 
     }
-}
-// 单链表节点的结构
-class ListNode {
-    int val;
-    ListNode next;
-    ListNode(int x) { val = x; }
 }

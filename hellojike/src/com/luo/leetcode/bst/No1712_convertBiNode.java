@@ -2,6 +2,7 @@ package com.luo.leetcode.bst;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import static com.luo.util.CommonUtil.*;
 /**
@@ -42,8 +43,68 @@ public class No1712_convertBiNode {
      * @return
      */
     public TreeNode convertBiNode2(TreeNode root) {
-        return root;
+        TreeNode tmp=new TreeNode(0);
+        tmp.right=root;
+        Stack<TreeNode> stack=new Stack<>();
+        TreeNode pre=tmp;
+        TreeNode curr=root;
+        while(curr!=null||!stack.isEmpty()){
+            while(curr!=null){
+                stack.push(curr);
+                curr=curr.left;
+            }
+            curr=stack.pop();
+            pre.right=curr;
+//            为什么可以直接置空?因为之前已经访问过了
+            curr.left=null;
+            pre=curr;
+            curr=curr.right;
+        }
+        return tmp.right;
     }
 
+    /**
+     * 递归实现
+     * @param root
+     * @return
+     */
+    public TreeNode convertBiNode3(TreeNode root){
+        TreeNode tmp=new TreeNode(0);
+        tmp.right=root;
+        helper3(tmp,root);
+        return tmp.right;
+    }
+
+    /**
+     * 功能是将
+     * @param pre
+     * @param curr
+     * @return
+     */
+    private TreeNode helper3(TreeNode pre,TreeNode curr){
+        if(curr!=null){
+            pre=helper3(pre,curr.left);
+            curr.left=null;
+            pre.right=curr;
+            pre=curr;
+            pre=helper3(pre,curr.right);
+        }
+        return pre;
+
+    }
+
+    public static void main(String[] args){
+        No1712_convertBiNode test=new No1712_convertBiNode();
+        Integer[] nums={4,2,6,1,3,5,8};
+        TreeNode treeNode = generateNode(nums);
+//        TreeNode root = test.convertBiNode(treeNode);
+//        System.out.println(root);
+
+//        TreeNode root = test.convertBiNode2(treeNode);
+//        System.out.println(root);
+
+        TreeNode root = test.convertBiNode3(treeNode);
+        System.out.println(root);
+    }
 
 }
