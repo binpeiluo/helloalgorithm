@@ -1,5 +1,7 @@
 package com.luo.leetcode.bfs;
 
+import javafx.util.Pair;
+
 import java.util.*;
 
 /**
@@ -26,6 +28,9 @@ public class No127_ladderLength {
 
     /**
      * 使用朴素的bfs算法实现,在单词列表寻找与当前单词只有一个字母之差的单词,判断是否等于endWord,然后入队
+     *
+     * 时间复杂度:    O(n*m) n为单词列表长度,m为单词字符串长度
+     * 空间复杂度:    O(n)
      * @param beginWord
      * @param endWord
      * @param wordList
@@ -348,6 +353,50 @@ public class No127_ladderLength {
         return 0;
     }
 
+    /**
+     * 预处理方法的bfs
+     * @param beginWord
+     * @param endWord
+     * @param wordList
+     * @return
+     */
+    public int ladderLength10(String beginWord, String endWord, List<String> wordList) {
+        if(!wordList.contains(endWord))
+            return 0;
+        int strLen=beginWord.length();
+        Map<String,List<String>> allCompoMap=new HashMap<>();
+        wordList.stream().forEach(
+                word->{
+                    for (int i = 0; i < strLen; i++) {
+                        String compo=word.substring(0,i)+"*"+word.substring(i+1,strLen);
+                        List<String> orDefault = allCompoMap.getOrDefault(compo, new ArrayList<>());
+                        orDefault.add(word);
+                        allCompoMap.put(compo,orDefault);
+                    }
+                }
+        );
+        Queue<Pair<String,Integer>> queue=new LinkedList<>();
+        Map<String,Boolean> visited=new HashMap<>();
+        queue.offer(new Pair<>(beginWord,1));
+        visited.put(beginWord,true);
+        while(!queue.isEmpty()){
+            Pair<String, Integer> poll = queue.poll();
+            String word = poll.getKey();
+            Integer level = poll.getValue();
+            for (int i = 0; i < strLen; i++) {
+                String newWord=word.substring(0,i)+"*"+word.substring(i+1,strLen);
+                for(String adjustWord:allCompoMap.getOrDefault(newWord,new ArrayList<>())){
+                    if(adjustWord.equals(endWord))
+                        return level+1;
+                    if(!visited.containsKey(adjustWord)){
+                        queue.offer(new Pair<>(adjustWord,level+1));
+                        visited.put(adjustWord,true);
+                    }
+                }
+            }
+        }
+        return 0;
+    }
 
     public static void main(String[] args){
         No127_ladderLength test=new No127_ladderLength();
@@ -363,6 +412,8 @@ public class No127_ladderLength {
         int i2 = test.ladderLength6(beginWord, endWord, wordList);
         System.out.println(i2);
 
+        int i3 = test.ladderLength10(beginWord, endWord, wordList);
+        System.out.println(i3);
     }
 
 }
