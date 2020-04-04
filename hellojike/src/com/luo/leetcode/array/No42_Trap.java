@@ -77,14 +77,48 @@ public class No42_Trap {
         return res;
     }
 
+    /**
+     * 仔细想想，其实方法二不需要两个辅助数组。
+     * 可以双指针实现，两个指针分别维护maxLeft,maxRight左边的最高点和右边的最高点
+     * @param height
+     * @return
+     */
+    public int trap3(int[] height){
+        if(height.length<3)
+            return 0;
+        int left=0,right=height.length-1;
+        int maxLeft=0,maxRight=0;
+        int res=0;
+        while(left<=right){
+            if(height[left]<height[right]){
+                if(height[left]>maxLeft)
+                    maxLeft=height[left];
+                else
+                    res+=maxLeft-height[left];
+                left++;
+            }else{
+                if(height[right]>maxRight)
+                    maxRight=height[right];
+                else
+                    res+=maxRight-height[right];
+                right--;
+            }
+        }
+        return res;
+    }
+
 
     public static void main(String[] args){
         No42_Trap test=new No42_Trap();
-        int[] height={2,0,2};
+//        int[] height={2,0,2};
+        int[] height={0,1,0,2,1,0,1,3,2,1,2,1};
         int trap = test.trap(height);
         System.out.println(trap);
 
         int i = test.trap2(height);
         System.out.println(i);
+
+        int i1 = test.trap3(height);
+        System.out.println(i1);
     }
 }
