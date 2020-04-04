@@ -55,10 +55,36 @@ public class No42_Trap {
         return sum;
     }
 
+    /**
+     * 使用两个辅助数组记录两边的最大值
+     * @param height
+     * @return
+     */
+    public int trap2(int[] height) {
+        if(height.length<=2)
+            return 0;
+        int len=height.length;
+        int[] leftMax=new int[len];
+        int[] rightMax=new int[len];
+        for (int i = 0; i < len; i++) {
+            leftMax[i]=Math.max(i==0?leftMax[i]:leftMax[i-1],height[i]);
+            rightMax[len-1-i]=Math.max(i==0?rightMax[len-1-i]:rightMax[len-i],height[len-1-i]);
+        }
+        int res=0;
+        for (int i = 1; i < len-1; i++) {
+            res+=Math.min(leftMax[i],rightMax[i])-height[i];
+        }
+        return res;
+    }
+
+
     public static void main(String[] args){
         No42_Trap test=new No42_Trap();
         int[] height={2,0,2};
         int trap = test.trap(height);
         System.out.println(trap);
+
+        int i = test.trap2(height);
+        System.out.println(i);
     }
 }
