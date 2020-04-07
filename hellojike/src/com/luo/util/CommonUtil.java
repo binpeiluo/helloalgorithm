@@ -58,6 +58,16 @@ public class CommonUtil {
         }
         System.out.println();
     }
+    public static void display(boolean[][] a){
+        System.out.println("数组长度:"+a.length);
+        for(boolean[] n:a){
+            for(boolean b:n){
+                System.out.print("\t"+b);
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
 
     public static void display(char[][] cs){
         System.out.println("数组长度:"+cs.length);
