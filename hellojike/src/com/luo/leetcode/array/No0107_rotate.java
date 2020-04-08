@@ -27,6 +27,7 @@ public class No0107_rotate {
 
     /**
      * 旋转公式:(x,y)->(y,n-1-x)
+     * 果然太navie,对于每个元素使用旋转公式反转其实完成不了,因为遍历是从上到下,从左到右.有的元素已经在正确位置了但还会继续旋转
      * @param matrix
      */
     public void rotate(int[][] matrix) {
@@ -46,6 +47,34 @@ public class No0107_rotate {
         matrix[y][n-1-x]=temp;
     }
 
+    /**
+     * 可以先经左上右下对角线进行翻转,然后再对每行倒序
+     *
+     * @param matrix
+     */
+    public void rotate2(int[][] matrix){
+        int len=matrix.length;
+        if(len<=1)
+            return;
+//        旋转公式,(x,y)->(y,x)
+        for (int i = 0; i < len; i++) {
+            for (int j = 0; j < i; j++) {
+                int temp=matrix[i][j];
+                matrix[i][j]=matrix[j][i];
+                matrix[j][i]=temp;
+            }
+        }
+
+        for (int i = 0; i < len; i++) {
+            for (int j = 0; j <len / 2; j++) {
+                int temp=matrix[i][j];
+                matrix[i][j]=matrix[i][len-1-j];
+                matrix[i][len-1-j]=temp;
+            }
+        }
+    }
+
+
     public static void main(String[] args){
         No0107_rotate test=new No0107_rotate();
         int[][] matrix={
@@ -53,7 +82,7 @@ public class No0107_rotate {
                         {8,5,2},
                         {9,6,3}
                 };
-        test.rotate(matrix);
+        test.rotate2(matrix);
         CommonUtil.display(matrix);
     }
 }
