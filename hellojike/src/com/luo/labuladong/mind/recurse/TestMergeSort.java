@@ -1,4 +1,4 @@
-package com.luo.labuladong.mind.dp;
+package com.luo.labuladong.mind.recurse;
 
 import com.luo.util.CommonUtil;
 
