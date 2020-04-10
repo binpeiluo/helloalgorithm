@@ -1,4 +1,4 @@
-package com.luo.leetcode.stack;
+package com.luo.leetcode.trace;
 
 import java.util.ArrayList;
 import java.util.List;
