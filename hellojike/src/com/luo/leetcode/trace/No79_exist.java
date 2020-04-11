@@ -43,8 +43,11 @@ public class No79_exist {
 
     private int[][] direct={{1,0},{0,1},{-1,0},{0,-1}};
     private boolean helper(char[][] board,boolean[][] vistied,String word,int wIndex,int r,int c){
-        if(wIndex==word.length())
-            return true;
+//        自己的想法,这里一直考虑成 if(wIndex==word.length()) 即字符串的指针超出的长度即是匹配成功,
+//        但是这里和下边四个方向的for循环相排斥,里边做了board的r,c指针的范围判断,越界即不会进行深度遍历调用,导致不会进入这个判断中来
+//        故将字符串的判断修改下即可
+        if(wIndex==word.length()-1)
+            return word.charAt(wIndex)==board[r][c];
         int rLen=board.length;
         int cLen=board[0].length;
         if(board[r][c]!=word.charAt(wIndex))
