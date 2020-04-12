@@ -88,11 +88,32 @@ public class No89_grayCode {
         return key;
     }
 
+    /**
+     * 列出n=1,2,3等格雷数时,能发现规律
+     * @param n
+     * @return
+     */
+    public List<Integer> grayCode2(int n) {
+        List<Integer> result=new ArrayList<>();
+        result.add(0);
+        for (int i = 0; i <n; i++) {
+            int size = result.size();
+            int base= (int) Math.pow(2,i);
+            for (int j = 0; j < size; j++) {
+                result.add(base+result.get(size-1-j));
+            }
+        }
+        return result;
+    }
+
     public static void main(String[] args){
         No89_grayCode test=new No89_grayCode();
         int n=2;
-        List<Integer> list = test.grayCode(2);
+        List<Integer> list = test.grayCode(n);
         System.out.println(list);
+
+        List<Integer> list1 = test.grayCode2(n);
+        System.out.println(list1);
     }
 
 }
