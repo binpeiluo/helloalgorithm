@@ -38,31 +38,10 @@ public class No445_addTwoNumbers {
 //        处理进位
         int c=0;
         ListNode res=null;
-        while(!s1.isEmpty() && !s2.isEmpty()){
-            Integer i1 = s1.pop();
-            Integer i2 = s2.pop();
-            int n=(i1+i2+c)%10;
-            c=(i1+i2+c)/10;
-            ListNode node=new ListNode(n);
-            node.next=res;
-            res=node;
-        }
-        while(!s1.isEmpty()){
-            Integer i1=s1.pop()+c;
-            c=i1/10;
-            ListNode node=new ListNode(i1%10);
-            node.next=res;
-            res=node;
-        }
-        while(!s2.isEmpty()){
-            Integer i2 = s2.pop()+c;
-            c=i2/10;
-            ListNode node=new ListNode(i2%10);
-            node.next=res;
-            res=node;
-        }
-        if(c!=0){
-            ListNode node=new ListNode(c);
+        while(c!=0||!s1.isEmpty()||!s2.isEmpty()){
+            int n=(s1.isEmpty()?0:s1.pop())+(s2.isEmpty()?0:s2.pop())+c;
+            c=n/10;
+            ListNode node=new ListNode(n%10);
             node.next=res;
             res=node;
         }
