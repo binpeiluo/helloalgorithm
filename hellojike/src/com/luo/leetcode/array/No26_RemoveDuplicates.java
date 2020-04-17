@@ -47,13 +47,42 @@ public class No26_RemoveDuplicates {
         return i+1;
     }
 
+    /**
+     * 双指针,i指向当前没有重复的元素,j指向当前遍历指向的元素
+     * @param nums
+     * @return
+     */
+    public int removeDuplicates2(int[] nums){
+        int i=0,j=i+1;
+        int len=nums.length;
+        if(len<2)
+            return len;
+        for (;j<len;j++){
+            if(nums[j]!=nums[i]){
+//                这里并不能简单的进行i++,需要给i+1赋值
+                nums[++i]=nums[j];
+            }
+        }
+        return i+1;
+    }
+
+    private void print(int[] nums,int len){
+        System.out.println("去重后长度:"+len);
+        for (int i = 0; i < len; i++) {
+            System.out.print("\t"+nums[i]);
+        }
+        System.out.println();
+    }
+
     public static void main(String[] args){
         No26_RemoveDuplicates test=new No26_RemoveDuplicates();
         int[] nums={0,0,1,1,1,2,2,3,3,4};
-        int count = test.removeDuplicates(nums);
-        for(int i=0;i<count;i++){
-            System.out.print("\t"+nums[i]);
-        }
+//        int count = test.removeDuplicates(nums);
+//        test.print(nums,count);
+
+        int i = test.removeDuplicates2(nums);
+        test.print(nums,i);
+
 
     }
 }
