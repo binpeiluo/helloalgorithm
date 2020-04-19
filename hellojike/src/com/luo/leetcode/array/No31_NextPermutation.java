@@ -52,12 +52,56 @@ public class No31_NextPermutation {
         }
     }
 
+    /**
+     * 分为四个步骤
+     *  1 从后往前找到下降的位置.有下降的位置说明有比该数字大的组合
+     *  2 找到下降位置后,在后边找到大于此下降位置的最小数字
+     *  3 交换下降位置数值和大于此位置的数值
+     *  4 从下降位置处倒置后边数值
+     * @param nums
+     */
+    public void nextPermutation2(int[] nums) {
+        int len=nums.length;
+//        从尾部向首部寻找开始下降的位置,
+        int max=nums.length-1;
+        while(max>0 && nums[max-1] >= nums[max]){
+            max--;
+        }
+        if(max>0){
+//        在下降位置后寻找大于该值的最小值
+            int replace=max;
+            while(replace+1<len && nums[replace+1] >nums[max-1] ){
+                replace++;
+            }
+//            交换 max和 replace
+            exch(nums,max-1,replace);
+        }
+//            倒置
+        reverse(nums,max,len-1);
+    }
+
 
     public static void main(String[] args){
         No31_NextPermutation test=new No31_NextPermutation();
-        int[] nums={1,3,2};
+        int[] nums={1,2,3};
         CommonUtil.display(nums);
         test.nextPermutation(nums);
         CommonUtil.display(nums);
+
+        test.nextPermutation2(nums);
+        CommonUtil.display(nums);
+
+        test.nextPermutation2(nums);
+        CommonUtil.display(nums);
+
+        test.nextPermutation2(nums);
+        CommonUtil.display(nums);
+
+        test.nextPermutation2(nums);
+        CommonUtil.display(nums);
+
+        test.nextPermutation2(nums);
+        CommonUtil.display(nums);
+
     }
 }
