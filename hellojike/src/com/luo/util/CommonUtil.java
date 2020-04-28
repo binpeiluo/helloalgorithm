@@ -205,7 +205,15 @@ public class CommonUtil {
             list[i].next=list[i+1];
         }
         return list[0];
+    }
 
+    public static void printListNode(ListNode node){
+        System.out.println("链表:");
+        while(node!=null){
+            System.out.print("\t-->"+node.val);
+            node=node.next;
+        }
+        System.out.println();
     }
 
     public static void main(String[] args){
