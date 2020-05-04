@@ -43,27 +43,24 @@ public class No45_jump {
 
     /**
      * 尝试使用bfs ,对比以下别人的代码简直了.
-     *
+     * 这里是抽象的广度优先遍历，不使用queue结构，而是使用当前层能跳去的最大位置代表一层。跳到最尾部则进入下一层
      * @param nums
      * @return
      */
     public int jump2(int[] nums){
         int len=nums.length;
-        Queue<Integer> queue=new LinkedList<>();
-        queue.offer(0);
+        int start=0,end=1,max=0;
         int res=0;
-        while(!queue.isEmpty()){
-            int size = queue.size();
-            res++;
-            for (int i = 0; i < size; i++) {
-                Integer poll = queue.poll();
-                if(poll<len){
-//                    nums[poll];
-                }
+        while(end<len){
 
+            for (int i = start; i < end; i++) {
+                max=Math.max(max,i+nums[i]);
             }
+            start=end;
+            end=max+1;
+            res++;
         }
-        return 0;
+        return res;
     }
 
     /**
@@ -75,15 +72,21 @@ public class No45_jump {
      */
     public int jump3(int[] nums){
         int len=nums.length;
+//        代表每一层广度遍历的起点
         int start=0;
+//        代表每一层广度遍历的终点后一个位置
         int end=1;
+//        返回结果
         int res=0;
+//        类似dfs思想，结束条件是当end==len
         while(end<len){
 //            当前能跳跃到的最远距离
             int max=start;
+//            这一层能达到的最远距离，为下一层广度遍历做准备
             for (int i = start; i < end; i++) {
                 max=Math.max(max,i+nums[i]);
             }
+//            当前层广度遍历完成，准备进入下一层遍历
             res++;
             start=end;
             end=max+1;
@@ -116,6 +119,9 @@ public class No45_jump {
         int[] nums={2,3,1,1,4};
         int jump = test.jump(nums);
         System.out.println(jump);
+
+        int i1 = test.jump2(nums);
+        System.out.println(i1);
 
         int i = test.jump3(nums);
         System.out.println(i);
