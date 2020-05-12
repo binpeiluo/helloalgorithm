@@ -155,10 +155,10 @@ public class CommonUtil {
             if(valuas[i]!=null)
                 nodes[i]=new TreeNode(valuas[i]);
         }
-        for (int i = 1; i < len / 2; i++) {
+        for (int i = 1; i <=(len-1) / 2; i++) {
             if(nodes[i]!=null){
                 nodes[i].left=nodes[2*i];
-                nodes[i].right=nodes[2*i+1];
+                nodes[i].right=(2*i+1==len)?null:nodes[2*i+1];
             }
         }
         return nodes[1];
