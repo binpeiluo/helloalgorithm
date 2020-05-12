@@ -46,27 +46,45 @@ public class No155_MinStack {
     static class MinStack implements IMinStack {
 
         private Stack<Integer> stack;
-        private Integer currMin;
+//        其实也没有必要使用这个变量。可以使用stack.peek获取当前栈元素的最小值
+//        private Integer currMin;
 
         /** initialize your data structure here. */
         public MinStack() {
             stack=new Stack<>();
         }
 
+        @Override
         public void push(int x) {
-            if(currMin==null)
-                currMin=x;
-            else
-                currMin=Math.min(currMin,x);
-            stack.push(x);
-            stack.push(currMin);
+//            if(currMin==null)
+//                currMin=x;
+//            else
+////                这里currMin取值为栈顶的最小值与当前压入值的较小值，
+////                并不是currMin=min(currMin,x)
+//                currMin=Math.min(stack.peek(),x);
+//            stack.push(x);
+//            stack.push(currMin);
+
+            if(stack.isEmpty()){
+                stack.push(x);
+                stack.push(x);
+            }else{
+                int min=Math.min(stack.peek(),x);
+                stack.push(x);
+                stack.push(min);
+            }
         }
 
+        @Override
         public void pop() {
             stack.pop();
             stack.pop();
+//            当栈为空时，需要维护currMin定义，currMin表示当前栈元素中的最小值。
+//            if(stack.isEmpty())
+//                currMin=null;
         }
 
+        @Override
         public int top() {
             Integer min = stack.pop();
             Integer peek = stack.peek();
@@ -74,13 +92,56 @@ public class No155_MinStack {
             return peek;
         }
 
+        @Override
         public int getMin() {
             return stack.peek();
         }
     }
 
+    static class MinStack1 implements IMinStack{
+
+        class Node{
+            int val;
+            int min;
+            Node next;
+            Node(int val,int min,Node next){
+                this.val=val;
+                this.min=min;
+                this.next=next;
+            }
+        }
+
+        Node head;
+
+        public MinStack1(){
+
+        }
+        @Override
+        public void push(int x) {
+            if(head==null){
+                head=new Node(x,x,null);
+            }else{
+                head=new Node(x,Math.min(head.min,x),head);
+            }
+        }
+
+        @Override
+        public void pop() {
+            head=head.next;
+        }
+
+        @Override
+        public int top() {
+            return head.val;
+        }
+
+        @Override
+        public int getMin() {
+            return head.min;
+        }
+    }
     public static void main(String[] args){
-        MinStack stack1=new MinStack();
+        MinStack1 stack1=new MinStack1();
         stack1.push(-2);
         stack1.push(0);
         stack1.push(-3);
@@ -94,7 +155,6 @@ public class No155_MinStack {
         System.out.println(top);
         min=stack1.getMin();
         System.out.println(min);
-
 
     }
 }
