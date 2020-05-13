@@ -53,6 +53,8 @@ public class No102_levelOrder {
     }
 
     private void helper2(TreeNode t,int level){
+        if(t==null)
+            return;
         if(result.size()==level)
             result.add(new ArrayList<>());
         result.get(level).add(t.val);
