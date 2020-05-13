@@ -207,6 +207,26 @@ public class CommonUtil {
         return list[0];
     }
 
+    /**
+     *
+     * @param nums
+     * @param cycleStart
+     * @param cycleNext
+     * @return
+     */
+    public static ListNode[] generateListNodeCycle(int[] nums,int cycleStart,int cycleNext){
+        int len=nums.length;
+        ListNode[] list=new ListNode[len];
+        for(int i=0;i<len;i++){
+            list[i]=new ListNode(nums[i]);
+        }
+        for (int i = 0; i < len - 1; i++) {
+            list[i].next=list[i+1];
+        }
+        list[cycleStart].next=list[cycleNext];
+        return list;
+    }
+
     public static void printListNode(ListNode node){
         System.out.println("链表:");
         while(node!=null){
