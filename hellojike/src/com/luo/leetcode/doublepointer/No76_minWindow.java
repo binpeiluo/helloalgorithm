@@ -45,6 +45,7 @@ public class No76_minWindow {
             if(need.containsKey(c)){
                 window.put(c,window.getOrDefault(c,0)+1);
 //            假如窗口内的某个元素个数达到need的字符个数,那么该字符达成.valid+1
+//                Integer进行比较时,需要特别注意.当Integer.valuaOf()在-128~127之间是使用缓存,不然会new一个新的对象,此时再使用==比较就会出错!
                 if(window.get(c).compareTo(need.get(c))==0)
                     valid++;
             }
