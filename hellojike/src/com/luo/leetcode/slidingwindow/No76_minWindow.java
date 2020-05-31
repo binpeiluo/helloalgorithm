@@ -74,6 +74,51 @@ public class No76_minWindow {
         return result;
     }
 
+    /**
+     * 典型滑动窗口问题
+     * @param s
+     * @param t
+     * @return
+     */
+    public String minWindow2(String s, String t) {
+        int[] window=new int[256];
+        int[] need=new int[256];
+        int valid=0,left=0,len=s.length();
+        String result="";
+        boolean found=false;
+        int needValid=0;
+        for (char c:t.toCharArray()){
+            if(need[c]==0)
+                needValid++;
+            need[c]++;
+        }
+        for (int right=0;right<len;right++){
+            int charRightInt=s.charAt(right);
+            window[charRightInt]++;
+//            right++
+//            由于这里使用for循环,right++需要等待循环体处理完后才进行自增,故后边需要依赖此变量需要+1
+            if(window[charRightInt]==need[charRightInt])
+                valid++;
+            while(valid==needValid){
+                int charLeftInt=s.charAt(left);
+                if(window[charLeftInt]==need[charLeftInt])
+                    valid--;
+                window[charLeftInt]--;
+//                这里由于先自增,故依赖left变量需要-1
+                left++;
+
+                if(!found){
+                    result=s.substring(left-1,right+1);
+                    found=true;
+                }else{
+                    if(right-left+1<result.length())
+                        result=s.substring(left-1,right+1);
+                }
+            }
+        }
+        return result;
+    }
+
     public static void main(String[] args){
         No76_minWindow test=new No76_minWindow();
 //        String S = "ADOBECODEBANC", T = "ABC";
@@ -81,5 +126,8 @@ public class No76_minWindow {
 
         String s = test.minWindow(S, T);
         System.out.println(s);
+
+        String s1 = test.minWindow2(S, T);
+        System.out.println(s1);
     }
 }
