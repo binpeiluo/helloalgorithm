@@ -1,4 +1,4 @@
-package com.luo.leetcode.array;
+package com.luo.leetcode.slidingwindow;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -79,14 +79,43 @@ public class No3_lengthOfLongestSubstring {
         return res;
     }
 
+    /**
+     * 典型滑动窗口法
+     * @param s
+     * @return
+     */
+    public int lengthOfLongestSubstring3(String s){
+//        窗口内字符的个数
+        int[] window=new int[256];
+        int len=s.length();
+        int left=0;
+        int result=0;
+        for (int right = 0; right < len; right++) {
+//            向右滑动,并且更新窗口统计
+            int charInt=s.charAt(right);
+            window[charInt]++;
+//            当发现窗口内有重复元素时,缩小窗口,直到没有重复字符
+            while(window[charInt]>1){
+//                增大left以缩小窗口,并且更新统计信息
+                window[s.charAt(left)]--;
+                left++;
+            }
+            result=Math.max(result,right-left+1);
+        }
+        return result;
+    }
+
     public static void main(String[] args){
         No3_lengthOfLongestSubstring test=new No3_lengthOfLongestSubstring();
-//        String str="";
-        String str="abcabcbb";
+        String str="";
+//        String str="abcabcbb";
         int i = test.lengthOfLongestSubstring(str);
         System.out.println(i);
 
         int i1 = test.lengthOfLongestSubstring2(str);
         System.out.println(i1);
+
+        int i2 = test.lengthOfLongestSubstring3(str);
+        System.out.println(i2);
     }
 }

@@ -1,4 +1,4 @@
-package com.luo.leetcode.doublepointer;
+package com.luo.leetcode.slidingwindow;
 /*
 
 424. 替换后的最长重复字符

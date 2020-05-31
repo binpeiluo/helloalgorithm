@@ -1,4 +1,4 @@
-package com.luo.leetcode.doublepointer;
+package com.luo.leetcode.slidingwindow;
 
 /*
 
