@@ -1,5 +1,7 @@
 package com.luo.leetcode.array;
 
+import com.luo.util.CommonUtil;
+
 import java.util.*;
 
 /*
@@ -133,6 +135,13 @@ public class No15_ThreeSum {
     }
 
 
+    /**
+     * 使用 for循环+双指针
+     * 时间复杂度:   O(n^2)
+     * 空间复杂度:   O(1)
+     * @param nums
+     * @return
+     */
     public List<List<Integer>> threeSum5(int[] nums){
         Arrays.sort(nums);
         int len=nums.length;
@@ -149,7 +158,7 @@ public class No15_ThreeSum {
                 int sum=nums[i]+nums[left]+nums[right];
                 if((left>i+1&&nums[left]==nums[left-1])||sum<0){
                     left++;
-                }else if((right<len-1&&nums[right-1]==nums[right])||sum>0){
+                }else if((right<len-1&&nums[right]==nums[right+1])||sum>0){
                     right--;
                 }else{
                     result.add(Arrays.asList(nums[i],nums[left],nums[right]));
