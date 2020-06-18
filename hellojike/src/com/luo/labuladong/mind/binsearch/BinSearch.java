@@ -3,6 +3,39 @@ package com.luo.labuladong.mind.binsearch;
 @SuppressWarnings("Duplicates")
 public class BinSearch {
 
+    public int findIndex(int[] nums,int target){
+        int len=nums.length;
+        int left=0,right=len-1;
+        while(left<=right){
+            int mid=left+(right-left)/2;
+            if(nums[mid]==target){
+                return mid;
+            }else if(nums[mid]<target){
+                left=mid+1;
+            }else if(nums[mid]>target){
+                right=mid-1;
+            }
+        }
+        return -1;
+    }
+
+    public int findIndex2(int[] nums,int target){
+        int len=nums.length;
+        int left=0,right=len;
+        while(left<right){
+            int mid=left+(right-left)/2;
+            if(nums[mid]==target){
+                return mid;
+            }else if(nums[mid]<target){
+                left=mid+1;
+            }else if(nums[mid]>target){
+                right=mid;
+            }
+        }
+        return -1;
+    }
+
+
     /**
      * 找到数组中第一个target元素
      *
@@ -141,7 +174,13 @@ public class BinSearch {
     public static void main(String[] args){
         BinSearch test=new BinSearch();
         int[] nums={5,7,7,8,8,10};
-        int target =3;
+        int target =8;
+
+        int index = test.findIndex(nums, target);
+        System.out.println(index);
+
+        int index2 = test.findIndex2(nums, target);
+        System.out.println(index2);
 
         int indexLeft = test.findIndexLeft(nums, target);
         System.out.println(indexLeft);
