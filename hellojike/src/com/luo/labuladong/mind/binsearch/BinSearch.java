@@ -85,7 +85,7 @@ public class BinSearch {
     public int findIndexRight(int[] nums,int target){
         int len=nums.length;
         int left=0,right=len;
-//        先找出小于等于target的最后一个元素
+//        先找出大于target的第一个元素
         while(left<right){
             int mid=left+(right-left)/2;
             if(nums[mid]==target){
@@ -93,23 +93,55 @@ public class BinSearch {
 //                这里是更新left指针,注意不能更新为left=mid,因为本来长度比较小的时候,left本来就会等于mid
 //                而更新成mid+1会不会错误唯一的一个等于target的元素呢?
 //                思考一下,当right更新成mid-1就不会出现这种情况
+
+//                这里当mid元素等于target时,扩大left边界为mid+1,所以最终left指向肯定不是target
                 left=mid+1;
             }else if(nums[mid]<target){
 //                当mid小于target时,区间修改为[mid,hi)
-                left=mid;
+                left=mid+1;
             }else if(nums[mid]>target){
 //                当mid大于target时,
+                right=mid;
+            }
+        }
+        if(left==0){
+            return -1;
+        }
+        left=(nums[left-1]!=target)?-1:left-1;
+        return left;
+    }
+
+    /**
+     * 查找出最后一个等于target的位置
+     * 使用闭区间搜索
+     * @param nums
+     * @param target
+     * @return
+     */
+    public int findIndexRight2(int[] nums,int target){
+        int len=nums.length;
+        int left=0,right=len-1;
+        while(left<=right){
+            int mid=left+(right-left)/2;
+            if(nums[mid]==target){
+                left=mid+1;
+            }else if(nums[mid]<target){
+                left=mid+1;
+            }else if(nums[mid]>target){
                 right=mid-1;
             }
         }
-        left=(left==nums.length||nums[left]!=target)?-1:left;
+        if(left==0){
+            return -1;
+        }
+        left=nums[left-1]==target?left-1:-1;
         return left;
     }
 
     public static void main(String[] args){
         BinSearch test=new BinSearch();
         int[] nums={5,7,7,8,8,10};
-        int target =10;
+        int target =3;
 
         int indexLeft = test.findIndexLeft(nums, target);
         System.out.println(indexLeft);
@@ -118,5 +150,8 @@ public class BinSearch {
 
         int indexRight = test.findIndexRight(nums, target);
         System.out.println(indexRight);
+
+        int indexRight2 = test.findIndexRight2(nums, target);
+        System.out.println(indexRight2);
     }
 }
