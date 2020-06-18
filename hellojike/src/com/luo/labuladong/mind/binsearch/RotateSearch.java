@@ -58,12 +58,50 @@ public class RotateSearch {
         return nums[left];
     }
 
+    /**
+     * 找到旋转数组的中位数
+     * @param nums
+     * @return
+     */
+    public double findMiddleNumber(int[] nums){
+        int len=nums.length;
+        int minIndex = this.findMinIndex(nums);
+        System.out.println(minIndex);
+        int right=len/2;
+        int left=(len-1)/2;
+        return (nums[(minIndex+left)%len]+nums[(minIndex+right)%len])/2.0;
+    }
+
+    /**
+     * 找出旋转数组的最小元素的角标
+     * @param nums
+     * @return
+     */
+    private int findMinIndex(int[] nums){
+        int len=nums.length;
+        int left=0,right=len-1;
+        while(left<right){
+            int mid=left+(right-left)/2;
+            if(nums[mid]<nums[right]){
+//                有可能当前mid是最小的,所以不能right=mid+1
+                right=mid;
+            }else if(nums[mid]>nums[right]){
+//
+                left=mid+1;
+            }else if(nums[mid]==nums[right]){
+                right--;
+            }
+        }
+        return left;
+    }
+
     public static void main(String[] args){
         RotateSearch test=new RotateSearch();
 //        int[] numbers={3,4,5,1,2};
+        int[] numbers={4,5,1,2,3};
 //        int[] numbers={1,2,3,4,5};
 //        int[] numbers={1,0,1,1,1};
-        int[] numbers={1,1,1,0,1};
+//        int[] numbers={1,1,1,0,1};
 
         int minInRotaft = test.findMinInRotaft(numbers);
         System.out.println(minInRotaft);
@@ -73,5 +111,8 @@ public class RotateSearch {
 
         int max = test.findMax(numbers);
         System.out.println(max);
+
+        double middleNumber = test.findMiddleNumber(numbers);
+        System.out.println(middleNumber);
     }
 }
