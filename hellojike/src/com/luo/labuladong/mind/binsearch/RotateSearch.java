@@ -289,7 +289,7 @@ public class RotateSearch {
                 }
             }else if(nums[mid]>nums[right]){
 //                后边乱序,那么前边是有序
-                if(nums[mid]>target||target<nums[right]){
+                if(nums[mid]>target||target<nums[right]||(target==nums[right]&&target!=nums[left])){
 //                    大于后边数组第一个元素或者小于后边数组最后一个元素
                     left=mid+1;
                 }else{
@@ -303,6 +303,44 @@ public class RotateSearch {
         return nums[left]==target?left:-1;
     }
 
+    /**
+     * 在可能重复的旋转数组中查找是否存在target
+     * @param nums
+     * @param target
+     * @return
+     */
+    public boolean exsitsInRotate(int[] nums,int target){
+        int len=nums.length;
+        if(len==0)
+            return false;
+        int left=0,right=len-1;
+        while(left<right){
+            int mid=left+(right-left)/2;
+            if(nums[mid]==target){
+                return true;
+            }
+            if(nums[mid]<nums[right]){
+//              后边有序
+                if(nums[mid]<target&&target<=nums[right]){
+                    // 在后边数组有序范围之内
+                    left=mid+1;
+                }else{
+                    right=mid;
+                }
+            }else if(nums[mid]>nums[right]){
+                // 后边非有序
+                if(target>nums[mid]||target<=nums[right]){
+                    left=mid+1;
+                }else{
+                    right=mid;
+                }
+            }else{
+                right--;
+            }
+        }
+        return (right<0||nums[right]!=target)?false:true;
+    }
+
     public static void main(String[] args){
         RotateSearch test=new RotateSearch();
 //        int[] numbers={3,4,5,1,2};
@@ -311,10 +349,10 @@ public class RotateSearch {
 //        int[] numbers={1,0,1,1,1};
 //        int[] numbers={1,1,1,0,1};
 //        int[] numbers={5,5,5,1,2,3,4,5};
-        int[] numbers={0,0,5,5,5,6,7,8,9};
+//        int[] numbers={0,0,5,5,5,6,7,8,9};
 
-//        int[] numbers={2,1};
-        int target=5;
+        int[] numbers={1,3};
+        int target=3;
 
         int inRotaft = test.findInRotate(numbers, target);
         System.out.println("无重复旋转数组中查找:"+inRotaft);
@@ -342,6 +380,9 @@ public class RotateSearch {
 
         int targetMinIndex2 = test.findTargetMinIndex2(numbers, target);
         System.out.println("可重复旋转数组查找target最小角标"+targetMinIndex2);
+
+        boolean b = test.exsitsInRotate(numbers, target);
+        System.out.println("可重复旋转数组是否存在target:"+b);
 
     }
 }
