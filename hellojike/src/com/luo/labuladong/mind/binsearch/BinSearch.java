@@ -80,7 +80,7 @@ public class BinSearch {
      * @param target
      * @return
      */
-    private int findIndexLeft2(int[] nums,int target){
+    public int findIndexLeft2(int[] nums,int target){
         int lo=0,hi=nums.length-1;
 //        搜索区间,[lo,hi]
         while(lo<=hi){
@@ -107,6 +107,23 @@ public class BinSearch {
         }
         lo=(lo==nums.length||nums[lo]!=target)?-1:lo;
         return lo;
+    }
+
+
+    public int findIndexLeft3(int[] nums,int target){
+        int len=nums.length;
+        int left=0,right=len-1;
+        while(left<right){
+            int mid=left+(right-left)/2;
+            if(nums[mid]==target){
+                right=mid;
+            }else if(nums[mid]<target){
+                left=mid+1;
+            }else if(nums[mid]>target){
+                right=mid;
+            }
+        }
+        return nums[right]==target?right:-1;
     }
 
     /**
@@ -174,6 +191,7 @@ public class BinSearch {
     public static void main(String[] args){
         BinSearch test=new BinSearch();
         int[] nums={5,7,7,8,8,10};
+//        int[] nums={7,8};
         int target =8;
 
         int index = test.findIndex(nums, target);
@@ -183,9 +201,11 @@ public class BinSearch {
         System.out.println(index2);
 
         int indexLeft = test.findIndexLeft(nums, target);
-        System.out.println(indexLeft);
+        System.out.println("第一个target角标:"+indexLeft);
         int indexLeft2 = test.findIndexLeft2(nums, target);
-        System.out.println(indexLeft2);
+        System.out.println("第一个target角标:"+indexLeft2);
+        int indexLeft3 = test.findIndexLeft3(nums, target);
+        System.out.println("第一个target角标:"+indexLeft3);
 
         int indexRight = test.findIndexRight(nums, target);
         System.out.println(indexRight);
