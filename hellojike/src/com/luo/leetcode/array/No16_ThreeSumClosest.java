@@ -11,6 +11,8 @@ import java.util.Arrays;
         例如，给定数组 nums = [-1，2，1，-4], 和 target = 1.
         与 target 最接近的三个数的和为 2. (-1 + 2 + 1 = 2).
 */
+
+@SuppressWarnings("Duplicates")
 public class No16_ThreeSumClosest {
 
     /**
@@ -42,11 +44,42 @@ public class No16_ThreeSumClosest {
         return result;
     }
 
+    /**
+     * 排序完后,使用双指针
+     * @param nums
+     * @param target
+     * @return
+     */
+    public int threeSumClosest2(int[] nums, int target) {
+        Arrays.sort(nums);
+        int len=nums.length,result=nums[0]+nums[1]+nums[2];
+        for (int i = 0; i < len - 2; i++) {
+            int left=i+1,right=len-1;
+            while(left<right){
+                int sum=nums[i]+nums[left]+nums[right];
+                if(sum==target){
+                    return sum;
+                }else if(sum<target){
+                    left++;
+                }else if(sum>target){
+                    right--;
+                }
+                if(Math.abs(sum-target)<Math.abs(result-target)) {
+                    result = sum;
+                }
+            }
+        }
+        return result;
+    }
+
     public static void main(String[] args){
         No16_ThreeSumClosest test=new No16_ThreeSumClosest();
         int[] nums={-1,2,1,-4};
         int target=1;
         int i = test.threeSumClosest(nums, target);
         System.out.println(i);
+
+        int i1 = test.threeSumClosest2(nums, target);
+        System.out.println(i1);
     }
 }
