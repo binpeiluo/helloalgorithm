@@ -27,6 +27,7 @@ import java.util.*;
  * 输出: false
  *
  */
+@SuppressWarnings("Duplicates")
 public class No139_wordBreak {
 
     /**
@@ -60,6 +61,32 @@ public class No139_wordBreak {
             }
         }
         valid.put(str,false);
+        return false;
+    }
+
+    /**
+     * 题目中求字符串按照字典的单词拆分.
+     * 可以使用深度优先遍历以字符串单词做树遍历
+     * 不剪枝的话,遇到类似 aaaaaa [aaaa,aaa] 会超时
+     * @param s
+     * @param wordDict
+     * @return
+     */
+    public boolean wordBreak3(String s, List<String> wordDict) {
+        Set<String> set=new HashSet<>(wordDict);
+        return helper(s,set);
+    }
+
+    private boolean helper(String s,Set<String> set){
+        if("".equals(s)||s==null){
+            return true;
+        }
+        int len=s.length();
+        for (int i = 0; i <=len; i++) {
+            if(set.contains(s.substring(0,i))&&helper(s.substring(i,len),set)){
+                return true;
+            }
+        }
         return false;
     }
 
@@ -113,5 +140,8 @@ public class No139_wordBreak {
 
         boolean b1 = test.wordBreak2(s, wordDict);
         System.out.println(b1);
+
+        boolean b2 = test.wordBreak3(s, wordDict);
+        System.out.println(b2);
     }
 }
