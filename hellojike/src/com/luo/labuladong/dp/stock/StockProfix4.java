@@ -50,8 +50,40 @@ public class StockProfix4 {
 //        dp[n][0][0]=0 表示还没开始 收益为0
 //        dp[n][0][1]=负无穷,表示不会有这种情况
 
-        return 0;
+        int len=prices.length;
+        int[][][] dp=new int[len][k][2];
+//        枚举所有状态
+        for (int i = 0; i < len; i++) {
+            for (int j = 0; j < k; j++) {
+                for (int l = 0; l < 2; l++) {
 
+//                    第i天没持有时的收益==max(第i-1天没持有的收益,第i-1天持有收益+prices[i])
+//                    dp[i][j][0]=Math.max(dp[i-1][j][0],dp[i-1][j][1]+prices[i]);
+//                    dp[i][j][1]=Math.max(dp[i-1][j][1],dp[i-1][j-1][0]-prices[i]);
+
+                    dp[i][j][0]=Math.max(
+                            i-1<0?0:dp[i-1][j][0],
+                            (i-1<0?Integer.MIN_VALUE:dp[i-1][j][1])+prices[i]
+                    );
+                    dp[i][j][1]=Math.max(
+                            i-1<0?Integer.MIN_VALUE:dp[i-1][j][1],
+                            ((i-1<0||j-1<0)?0:dp[i-1][j-1][0])-prices[i]
+                    );
+                }
+            }
+        }
+        return dp[len-1][k-1][0];
+
+    }
+
+    public static void main(String[] args){
+        StockProfix4 test=new StockProfix4();
+//        int[] prices={2,4,1};
+//        int k=2;
+        int[] prices={3,2,6,5,0,3};
+        int k=2;
+        int i = test.maxProfit(k, prices);
+        System.out.println(i);
     }
 
 
