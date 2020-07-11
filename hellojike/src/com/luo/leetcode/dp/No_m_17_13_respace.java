@@ -1,4 +1,4 @@
-package com.luo.leetcode.bfs;
+package com.luo.leetcode.dp;
 
 import java.util.Arrays;
 import java.util.HashSet;
