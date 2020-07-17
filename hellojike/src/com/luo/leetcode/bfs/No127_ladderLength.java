@@ -24,6 +24,7 @@ import java.util.*;
  * 解释: 一个最短转换序列是 "hit" -> "hot" -> "dot" -> "dog" -> "cog",
  *      返回它的长度 5。
  */
+@SuppressWarnings("Duplicates")
 public class No127_ladderLength {
 
     /**
@@ -398,6 +399,62 @@ public class No127_ladderLength {
         return 0;
     }
 
+    /**
+     * 再来挑战
+     * 由于需要返回最短长度,使用bfs
+     * @param beginWord
+     * @param endWord
+     * @param wordList
+     * @return
+     */
+    public int ladderLength11(String beginWord, String endWord, List<String> wordList) {
+        Set<String> set=new HashSet<>(wordList);
+        if(!set.contains(endWord)){
+            return 0;
+        }
+        Set<String> visited=new HashSet<>();
+        Queue<String> queue=new LinkedList<>();
+        queue.offer(beginWord);
+        visited.add(beginWord);
+        int result=0;
+        while(!queue.isEmpty()){
+            int len=queue.size();
+            result++;
+            for (int i = 0; i < len; i++) {
+                String poll = queue.poll();
+//            找到相差一个字符的字符串
+                for(String word:wordList){
+                    if(visited.contains(word)||!canConvert11(poll,word)){
+                        continue;
+                    }
+                    if(word.equals(endWord)){
+                        return result+1;
+                    }
+                    queue.offer(word);
+                    visited.add(word);
+                }
+            }
+        }
+        return 0;
+    }
+
+    private boolean canConvert11(String wordA,String wordB){
+        int diff=0;
+        int len=wordA.length();
+        for (int i = 0; i < len; i++) {
+            if(wordA.charAt(i)!=wordB.charAt(i)){
+                diff++;
+                if(diff>1){
+                    return false;
+                }
+            }
+        }
+        return diff==1;
+    }
+
+
+
+
     public static void main(String[] args){
         No127_ladderLength test=new No127_ladderLength();
         String beginWord = "hit";
@@ -414,6 +471,9 @@ public class No127_ladderLength {
 
         int i3 = test.ladderLength10(beginWord, endWord, wordList);
         System.out.println(i3);
+
+        int i4 = test.ladderLength11(beginWord, endWord, wordList);
+        System.out.println(i4);
     }
 
 }
