@@ -75,8 +75,28 @@ public class No312_maxCoins {
         }
     }
 
+    /**
+     * 这里使用分治思想解决
+     * 分治重要在于如何用子问题来表示原来的问题
+     * 如果考虑戳破元素k,将数组分为两个子数组. nums[i,k-1] 和 nums[k+1,j]
+     * 戳破元素k后,k-1和k+1元素将变成相邻元素.此时难以计算
+     *
+     * 既然两个子问题都依赖k和两个边界,那我们在划分子问题时,k和两个边界我们都不戳破.
+     * 求出 i+1,k-1和k+1,j-1 之间的解.这样子两个子问题就不会被依赖.
+     * 并且如此划分后,只剩下元素k和两个边界没有被戳破.那我们可以使用两个子问题的解加上戳破k元素k额求出最大值
+     *
+     * 我们定义 def(i,j)表示不戳破i元素和j元素时,能获取到的最大值
+     * 那么 def(i,j)=def(i,k)+def(k,j)+nums[i][j][k]  ,i+1<=k<=j-1
+     *
+     * @param nums
+     * @return
+     */
     public int maxCoins2(int[] nums) {
-        return divide2(nums,0,nums.length-1);
+        int[] temp=new int[nums.length+2];
+        System.arraycopy(nums,0,temp,1,nums.length);
+        temp[0]=1;
+        temp[nums.length+1]=1;
+        return divide2(temp,0,temp.length-1);
     }
 
     private int divide2(int[] nums,int start,int end){
@@ -96,15 +116,66 @@ public class No312_maxCoins {
         return result;
     }
 
+    public int maxCoins_other(int[] nums) {
+        //空数组处理
+        if (nums == null) {
+            return 0;
+        }
+        //加虚拟边界
+        int length = nums.length;
+        int[] nums2=new int[length+2];
+        System.arraycopy(nums,0,nums2,1,length);
+        nums2[0]=1;
+        nums2[length+1]=1;
+        length=nums2.length;
+        //创建缓存数组
+        int[][] cache=new int[length][length];
+        //调用分治函数
+        return maxCoins_other(nums2, length,cache);
+    }
+
+    private int maxCoins_other(int[] nums, int length,int[][] cache) {
+        int max = maxCoins_other(nums, length, 0, length - 1,cache);
+        return max;
+    }
+    private static int maxCoins_other(int[] nums, int length, int begin, int end,int[][] cache) {
+        //回归条件，问题分解到最小子问题
+        if (begin == end - 1) {
+            return 0;
+        }
+//        //缓存，避免重复计算
+//        if(cache[begin][end]!=0){
+//            return cache[begin][end];
+//        }
+        //维护一个最大值
+        int max = 0;
+        //状态转移方程 def( i, j ) = max { def( i , k ) + def( k , j )+nums[ i ][ j ][ k ] } | i<k<j
+        for (int i = begin + 1; i < end; i++) {
+            int temp = maxCoins_other(nums, length, begin, i,cache)
+                    + maxCoins_other(nums, length, i, end,cache)
+                    + nums[begin] * nums[i] * nums[end];
+            if (temp > max) {
+                max = temp;
+            }
+        }
+//        //缓存，避免重复计算
+//        cache[begin][end]=max;
+        return max;
+    }
+
+
     public static void main(String[] args){
         No312_maxCoins test=new No312_maxCoins();
-//        int[] nums={3,1,5,8};
-        int[] nums={3,4,5,6,7,5,7,8,5,3,2,5};
+        int[] nums={3,1,5,8};
+//        int[] nums={3,4,5,6,7,5,7,8,5,3,2,5};
 
         int i = test.maxCoins(nums);
         System.out.println(i);
 
         int i1 = test.maxCoins2(nums);
         System.out.println(i1);
+
+        int i2 = test.maxCoins_other(nums);
+        System.out.println(i2);
     }
 }
