@@ -22,6 +22,7 @@ package com.luo.leetcode.trace;
  *      coins =  3*1*5      +  3*5*8    +  1*3*8      + 1*8*1   = 167
  *
  */
+@SuppressWarnings("Duplicates")
 public class No312_maxCoins {
 
     /**
@@ -88,6 +89,8 @@ public class No312_maxCoins {
      * 我们定义 def(i,j)表示不戳破i元素和j元素时,能获取到的最大值
      * 那么 def(i,j)=def(i,k)+def(k,j)+nums[i][j][k]  ,i+1<=k<=j-1
      *
+     * 为了验证正确性,我们向上推演一次. def(i,i+2)=def(i,i+1)+def(i+1,i+2)+nums[i][i+1][i+2]
+     * 所以最小子问题 def(i,i+1)应该等于0
      * @param nums
      * @return
      */
@@ -163,19 +166,64 @@ public class No312_maxCoins {
         return max;
     }
 
+    /**
+     * 动态规划
+     * 分治处理已经能看出动态规划的样子了
+     * @param nums
+     * @return
+     */
+    public int maxCoins3(int[] nums) {
+//        明确状态,起始位置i,结束位置j
+//        明确dp定义,dp[i][j]表示不戳破i和j能得到的最大值
+//        状态转移 dp[i][j]=max(dp[i][k]+dp[k][j]=nums[i][k][j]) ,i<k<j
+//          得知依赖原则,dp[i][j] 依赖 dp[i][k]和dp[k][j] ,i<k<j
+//        base case dp[i][i+1]=0
+        int len=nums.length;
+        int[] temp=new int[len+2];
+        System.arraycopy(nums,0,temp,1,len);
+        temp[0]=1;
+        temp[len+1]=1;
+        int[][] dp=new int[len+2][len+2];
+        for (int i = len+1; i >=0; i--) {
+            for (int j = i+1; j <len+2; j++) {
+                int res=0;
+                for (int k = i+1; k < j; k++) {
+                    res=Math.max(res,dp[i][k]+dp[k][j]+temp[i]*temp[k]*temp[j]);
+                }
+                dp[i][j]=res;
+            }
+        }
+        return dp[0][len+1];
+    }
+
 
     public static void main(String[] args){
         No312_maxCoins test=new No312_maxCoins();
-        int[] nums={3,1,5,8};
-//        int[] nums={3,4,5,6,7,5,7,8,5,3,2,5};
+//        int[] nums={3,1,5,8};
+        int[] nums={3,4,5,6,7,5,7,8,5,3,2,5};
 
+        long start = System.currentTimeMillis();
         int i = test.maxCoins(nums);
+        long end = System.currentTimeMillis();
         System.out.println(i);
+        System.out.println("耗时:"+(end-start)+" ms");
 
+        start = System.currentTimeMillis();
         int i1 = test.maxCoins2(nums);
+        end = System.currentTimeMillis();
         System.out.println(i1);
+        System.out.println("耗时:"+(end-start)+" ms");
 
+        start = System.currentTimeMillis();
         int i2 = test.maxCoins_other(nums);
+        end = System.currentTimeMillis();
         System.out.println(i2);
+        System.out.println("耗时:"+(end-start)+" ms");
+
+        start = System.currentTimeMillis();
+        int i3 = test.maxCoins3(nums);
+        end = System.currentTimeMillis();
+        System.out.println(i3);
+        System.out.println("耗时:"+(end-start)+" ms");
     }
 }
