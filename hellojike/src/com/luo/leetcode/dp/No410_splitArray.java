@@ -1,6 +1,8 @@
 package com.luo.leetcode.dp;
 
 
+import com.luo.util.CommonUtil;
+
 import java.util.Arrays;
 
 /**
@@ -25,6 +27,7 @@ import java.util.Arrays;
  * 因为此时这两个子数组各自的和的最大值为18，在所有情况中最小。
  *
  */
+@SuppressWarnings("Duplicates")
 public class No410_splitArray {
 
     /**
@@ -61,11 +64,20 @@ public class No410_splitArray {
 
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= Math.min(i, m); j++) {
+//                这里k的取值
                 for (int k = 0; k < i; k++) {
-                    dp[i][j] = Math.min(dp[i][j], Math.max(dp[k][j - 1], sub[i] - sub[k]));
+                    dp[i][j] = Math.min(
+                            dp[i][j],
+                            Math.max(
+                                    dp[k][j - 1],
+                                    sub[i] - sub[k]
+                            )
+                    );
                 }
             }
         }
+
+        CommonUtil.display(dp);
         return dp[n][m];
     }
 
@@ -120,10 +132,63 @@ public class No410_splitArray {
         return splitCnt<=m;
     }
 
+    /**
+     * 动态规划
+     * 思考如何使用动态规划,转移方程
+     * 设定 dp[i][j] 表示数组的前i个数切分为j个数组后每个子数组和的最小值
+     * dp[i][k] =min(dp[i-j][k-1],sub(j,i)), j<i
+     * 依赖关系 dp[i][k] 依赖 dp[i-j][k-1]
+     * base case dp[][0]=0
+     * @param nums
+     * @param m
+     * @return
+     */
+    public int splitArray3(int[] nums, int m) {
+        int len=nums.length;
+        int[][] dp=new int[len+1][m+1];
+        for (int i = 0; i <=len; i++) {
+            Arrays.fill(dp[i],Integer.MAX_VALUE);
+        }
+        dp[0][0]=0;
+//        前缀和
+        int[] preSum=new int[len+1];
+        for (int i = 1; i <=len; i++) {
+            preSum[i]+=preSum[i-1]+nums[i-1];
+        }
+        for (int i = 1; i <=len; i++) {
+            for (int j = 1; j <=Math.min(i,m); j++) {
+//                为什么这里必须取到 k==i, k==0有没取到没关系
+                for (int k = 0; k<=i; k++) {
+                    dp[i][j]=Math.min(
+                            dp[i][j],
+                            Math.max(
+                                    dp[i-k][j-1],
+                                    preSum[i]-preSum[i-k]
+                            )
+                    );
+                }
+
+//                for (int k = 0; k < i; k++) {
+//                    dp[i][j]=Math.min(
+//                            dp[i][j],
+//                            Math.max(
+//                                    dp[k][j-1],
+//                                    preSum[i]-preSum[k]
+//                            )
+//                    );
+//                }
+            }
+        }
+        return dp[len][m];
+    }
+
     public static void main(String[] args){
         No410_splitArray test=new No410_splitArray();
         int[] nums = {7,2,5,10,8};
         int m=2;
+
+//        int[] nums={1,2147483646};
+//        int m=1;
 
         int i = test.splitArray(nums, m);
         System.out.println(i);
@@ -131,6 +196,8 @@ public class No410_splitArray {
         int i1 = test.splitArray2(nums, m);
         System.out.println(i1);
 
+        int i2 = test.splitArray3(nums, m);
+        System.out.println(i2);
     }
 
 }
