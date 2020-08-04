@@ -236,6 +236,11 @@ public class CommonUtil {
         System.out.println();
     }
 
+    public static void printTreeNode(TreeNode root){
+        System.out.println("二叉树:");
+        System.out.println(root.toString());
+    }
+
     public static void main(String[] args){
         int[] ints = generateArray(10, 5, true);
         display(ints);
