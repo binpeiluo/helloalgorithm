@@ -15,6 +15,7 @@ import java.util.Queue;
  * 给定课程总量以及它们的先决条件，请你判断是否可能完成所有课程的学习？
  *
  */
+@SuppressWarnings("Duplicates")
 public class No207_canFinish {
     /**
      * 题目可以简化为判断是否出现有向环
@@ -234,12 +235,45 @@ public class No207_canFinish {
         return true;
     }
 
+
+    public boolean canFinish5(int numCourses, int[][] prerequisites) {
+//        每个节点的入度
+        int[] indegress=new int[numCourses];
+//        某个课程学完后可以学习什么课程
+        List<List<Integer>> adjust=new ArrayList<>();
+        for (int i = 0; i < numCourses; i++) {
+            adjust.add(new ArrayList<>());
+        }
+        for (int i = 0,len=prerequisites.length; i < len; i++) {
+            indegress[prerequisites[i][0]]++;
+            adjust.get(prerequisites[i][1]).add(prerequisites[i][0]);
+        }
+        Queue<Integer> queue=new LinkedList<>();
+        for (int i = 0; i < numCourses; i++) {
+            if(indegress[i]==0){
+                queue.offer(i);
+            }
+        }
+        int retailNum=numCourses;
+        while(!queue.isEmpty()){
+            Integer poll = queue.poll();
+            retailNum--;
+            for(Integer next:adjust.get(poll)){
+                indegress[next]--;
+                if(indegress[next]==0){
+                    queue.offer(next);
+                }
+            }
+        }
+        return retailNum==0;
+    }
+
     public static void main(String[] args){
         No207_canFinish test=new No207_canFinish();
         int numCourses=2;
 //        int[][] prerequisites={};
-        int[][] prerequisites={{1,0}};
-//        int[][] prerequisites={{0,1}};
+//        int[][] prerequisites={{1,0}};
+        int[][] prerequisites={{0,1},{1,0}};
 
         boolean b = test.canFinish(numCourses, prerequisites);
         System.out.println(b);
@@ -255,6 +289,9 @@ public class No207_canFinish {
 
         boolean b4 = test.canFinish4(numCourses, prerequisites);
         System.out.println(b4);
+
+        boolean b5 = test.canFinish5(numCourses, prerequisites);
+        System.out.println(b5);
     }
 
 }
