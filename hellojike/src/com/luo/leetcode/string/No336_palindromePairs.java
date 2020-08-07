@@ -1,5 +1,7 @@
 package com.luo.leetcode.string;
 
+import com.sun.xml.internal.ws.util.StringUtils;
+
 import java.util.*;
 
 /**
@@ -117,6 +119,7 @@ public class No336_palindromePairs {
 
     /**
      * 使用hashmap
+     * 边界处理得太好了
      * @param words
      * @return
      */
@@ -154,7 +157,7 @@ public class No336_palindromePairs {
         return ret;
     }
 
-    public boolean isPalindrome2(String s, int left, int right) {
+    private boolean isPalindrome2(String s, int left, int right) {
         int len = right - left + 1;
         for (int i = 0; i < len / 2; i++) {
             if (s.charAt(left + i) != s.charAt(right - i)) {
@@ -164,9 +167,63 @@ public class No336_palindromePairs {
         return true;
     }
 
-    public int findWord2(String s, int left, int right) {
+    private int findWord2(String s, int left, int right) {
         return indices.getOrDefault(s.substring(left, right + 1), -1);
     }
+
+    /**
+     * 重点在于利用回文串的性质
+     * 两个字符串拼起来能组成回文串,那么这两个字符串是具有一定性质的
+     * 其中一个字符串前缀或者后缀是回文串,剩下的部分和另一个字符串是逆序
+     * 判断是否存在子串的逆序,可以放置在hashmap,也可以放置在字典树
+     * @param words
+     * @return
+     */
+    public List<List<Integer>> palindromePairs3(String[] words) {
+        List<List<Integer>> result=new ArrayList<>();
+        int length = words.length;
+
+        Map<String,Integer> map=new HashMap<>();
+        for (int i = 0; i < length; i++) {
+            map.put(new StringBuilder(words[i]).reverse().toString(),i);
+        }
+        for (int i = 0; i < length; i++) {
+            String word = words[i];
+            int len=word.length();
+            for (int j = 0; j <=len; j++) {
+//                后缀是回文串
+                if(isPalindrome3(word,j,len-1)){
+//                    判断剩下的字符串是否在map中存在
+                    Integer index = map.getOrDefault(word.substring(0, j), -1);
+                    if(index!=-1 && index!=i){
+                        result.add(Arrays.asList(i,index));
+                    }
+                }
+//                前缀是回文串
+                if(j!=0&&isPalindrome3(word,0,j-1)){
+//                    substring(start,end) 当start>end会越界
+//                    System.out.println(i+","+j+","+len+","+word);
+                    Integer index = map.getOrDefault(word.substring(j, len - 1+1), -1);
+                    if(index!=-1 && index!=i){
+                        result.add(Arrays.asList(index,i));
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private boolean isPalindrome3(String str,int left,int right){
+        int step =(right-left+1)/2;
+        for (int i = 0; i <step; i++) {
+            if(str.charAt(left+i)!=str.charAt(right-i)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+
 
     public static void main(String[] args){
         No336_palindromePairs test=new No336_palindromePairs();
@@ -174,6 +231,9 @@ public class No336_palindromePairs {
 
         List<List<Integer>> lists = test.palindromePairs(words);
         System.out.println(lists);
+
+        List<List<Integer>> lists1 = test.palindromePairs3(words);
+        System.out.println(lists1);
     }
 
 }
