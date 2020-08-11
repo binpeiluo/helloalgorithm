@@ -2,6 +2,8 @@ package com.luo.leetcode.bfs;
 
 import com.luo.util.CommonUtil;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Stack;
 
 /**
@@ -23,6 +25,7 @@ import java.util.Stack;
  * 任何不在边界上，或不与边界上的 'O' 相连的 'O' 最终都会被填充为 'X'。
  * 如果两个元素在水平或垂直方向相邻，则称它们是“相连”的。
  */
+@SuppressWarnings("Duplicates")
 public class No130_solve {
 
     /**
@@ -62,7 +65,9 @@ public class No130_solve {
     }
     private void helper(char[][] board,int r,int c,int row,int column){
 //        注意结束条件
-        if(row<0||row>=r||column<0||column>=c||board[row][column]=='X'||board[row][column]=='#')
+        if(row<0||row>=r||column<0||column>=c
+                ||board[row][column]=='X'
+                ||board[row][column]=='#')
             return;
         if(board[row][column]=='O')
             board[row][column]='#';
@@ -117,18 +122,93 @@ public class No130_solve {
         }
     }
 
+    /**
+     * bfs 思路就是将边缘的O联通的所有O全部置换为特殊字符
+     * 然后将剩下的所有O再替换成X,最后将特殊字符还原
+     * @param board
+     */
+    public void solve3(char[][] board) {
+        int m=board.length;
+        if(m<=2){
+            return;
+        }
+        int n=board[0].length;
+        if(n<=2){
+            return;
+        }
+        int[][] direct={{0,1},{1,0},{0,-1},{-1,0}};
+        boolean[][] visited=new boolean[m][n];
+        Queue<int[]> queue=new LinkedList<>();
+        for (int i = 0; i < m; i++) {
+            if(board[i][0]=='O'){
+                queue.offer(new int[]{i,0});
+                visited[i][0]=true;
+            }
+            if(board[i][n-1]=='O'){
+                queue.offer(new int[]{i,n-1});
+                visited[i][n-1]=true;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            if(board[0][i]=='O'){
+                queue.offer(new int[]{0,i});
+                visited[0][i]=true;
+            }
+            if(board[m-1][i]=='O'){
+                queue.offer(new int[]{m-1,i});
+                visited[m-1][i]=true;
+            }
+        }
+        while(!queue.isEmpty()){
+            int[] poll = queue.poll();
+            if(board[poll[0]][poll[1]]=='O'){
+                board[poll[0]][poll[1]]='#';
+                for (int i = 0,len=direct.length; i < len; i++) {
+                    int x=direct[i][0]+poll[0];
+                    if(x<0||x>=m){
+                        continue;
+                    }
+                    int y=direct[i][1]+poll[1];
+                    if(y<0||y>=n){
+                        continue;
+                    }
+                    if(visited[x][y]||board[x][y]!='O'){
+                        continue;
+                    }
+                    queue.offer(new int[]{x,y});
+                    visited[x][y]=true;
+                }
+            }
+        }
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if(board[i][j]=='O'){
+                    board[i][j]='X';
+                }else if(board[i][j]=='#'){
+                    board[i][j]='O';
+                }
+            }
+        }
+    }
+
     public static void main(String[] args){
         No130_solve test=new No130_solve();
         char[][] board={
-                {'O','X','X','O','X'},
-                {'X','O','O','X','O'},
-                {'X','O','X','O','X'},
-                {'O','X','O','O','O'},
-                {'X','X','O','X','O'}
+//                {'O','X','X','O','X'},
+//                {'X','O','O','X','O'},
+//                {'X','O','X','O','X'},
+//                {'O','X','O','O','O'},
+//                {'X','X','O','X','O'}
+
+                {'O','O','O'},
+                {'O','O','O'},
+                {'O','O','O'},
+
         };
-        test.solve(board);
+//        test.solve(board);
 
 //        test.solve2(board);
+        test.solve3(board);
 
         CommonUtil.display(board);
     }
