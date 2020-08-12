@@ -13,9 +13,10 @@ import java.util.*;
  * public List<Node> neighbors;
  * }
  */
+@SuppressWarnings("Duplicates")
 public class No133_cloneGraph {
     // Definition for a Node.
-    class Node {
+    static class Node {
         public int val;
         public List<Node> neighbors;
 
@@ -89,5 +90,46 @@ public class No133_cloneGraph {
     }
 
 
+    /**
+     * dfs实现
+     * @param node
+     * @return
+     */
+    public Node cloneGraph3(Node node){
+        if(node==null){
+            return null;
+        }
+        Map<Integer,Node> map=new HashMap<>();
+        return dfs3(node,map);
+    }
 
+    private Node dfs3(Node node,Map<Integer,Node> map){
+        if(map.containsKey(node.val)){
+            return map.get(node.val);
+        }else{
+            Node newN=new Node(node.val);
+            map.put(node.val,newN);
+            List<Node> nes=new ArrayList<>();
+            for (Node ne:node.neighbors){
+                nes.add(dfs3(ne,map));
+            }
+            newN.neighbors=nes;
+            return newN;
+        }
+    }
+
+    public static void main(String[] args){
+        No133_cloneGraph test=new No133_cloneGraph();
+
+        Node n1=new Node(1);
+        Node n2=new Node(2);
+        Node n3=new Node(3);
+        Node n4=new Node(4);
+        n1.neighbors=Arrays.asList(n2,n4);
+        n2.neighbors=Arrays.asList(n1,n3);
+        n3.neighbors=Arrays.asList(n2,n4);
+        n4.neighbors=Arrays.asList(n1,n3);
+
+        test.cloneGraph(n1);
+    }
 }
