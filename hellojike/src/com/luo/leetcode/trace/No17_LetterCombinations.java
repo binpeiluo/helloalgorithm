@@ -12,6 +12,7 @@ import java.util.*;
         说明:
         尽管上面的答案是按字典序排列的，但是你可以任意选择答案输出的顺序。
 */
+@SuppressWarnings("Duplicates")
 public class No17_LetterCombinations {
 
     /**
@@ -53,10 +54,55 @@ public class No17_LetterCombinations {
         }
     }
 
+    /**
+     * 典型回溯 / dfs
+     * @param digits
+     * @return
+     */
+    public List<String> letterCombinations2(String digits) {
+
+        if(digits==null||"".equals(digits)){
+            return Collections.emptyList();
+        }
+
+        List<String> result=new ArrayList<>();
+        Map<Integer,List<String>> numberMap=new HashMap<>();
+        numberMap.put(2, Arrays.asList("a","b","c"));
+        numberMap.put(3, Arrays.asList("d","e","f"));
+        numberMap.put(4, Arrays.asList("g","h","i"));
+        numberMap.put(5, Arrays.asList("j","k","l"));
+        numberMap.put(6, Arrays.asList("m","n","o"));
+        numberMap.put(7, Arrays.asList("p","q","r","s"));
+        numberMap.put(8, Arrays.asList("t","u","v"));
+        numberMap.put(9, Arrays.asList("w","x","y","z"));
+
+        trace2(result,"",0,digits,numberMap);
+        return result;
+    }
+
+    private void trace2(List<String> result,
+                        String curr,
+                        int idx,
+                        String digits,
+                        Map<Integer,List<String>> numberMap){
+        if(idx==digits.length()){
+            result.add(curr);
+            return;
+        }
+        List<String> selects = numberMap.get(digits.charAt(idx) - '0');
+        for (int i = 0,len=selects.size(); i < len; i++) {
+            trace2(result,curr+selects.get(i),idx+1,digits,numberMap);
+        }
+    }
+
+
     public static void main(String[] args){
         No17_LetterCombinations test=new No17_LetterCombinations();
         String digits="23";
         List<String> strings = test.letterCombinations(digits);
         System.out.println(strings);
+
+        List<String> strings1 = test.letterCombinations2(digits);
+        System.out.println(strings1);
     }
 }
