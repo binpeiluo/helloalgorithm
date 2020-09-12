@@ -67,23 +67,33 @@ public class SegmentTreeMain {
 
     }
 
-    static void modify(int i, int value, int num) { // 把元素i修改为值value
+    /**
+     * 将元素i的值修改成 value
+     * @param i
+     * @param value
+     * @param num 这个表示起始点,线段树使用堆结构储存的.
+     */
+    private static void modify(int i, int value, int num) { // 把元素i修改为值value
         if (tree[num].left == tree[num].right) { // 到达叶子节点
             tree[num].sum = value;
             return;
         }
+//        利用num值来二分找到要修改的元素角标在哪边的子树下边
         int mid = (tree[num].left + tree[num].right) / 2;
         if (i <= mid) {
             modify(i, value, num * 2); // 递归左儿子
         } else {
             modify(i, value, num * 2 + 1); // 递归右儿子
         }
+//        直接写成这样子应该更好理解一点 前边已经计算好子元素的sum,这里计算根元素的sum
+//        tree[num].sum = tree[num * 2].sum + tree[num * 2 + 1].sum;
         updateNode(num);
     }
 
     private static void modifySegment(int left, int right, int value, int num) { // [left,right]每一项都增加value
         if (tree[num].left == left && tree[num].right == right) { // 找到当前区间
             tree[num].sum += (right - left + 1) * value; // right-left+1是区间元素个数
+//            已经更新了num元素的sum,为什么还需要修改lazy?
             tree[num].lazy += value;
             return;
         }
@@ -113,6 +123,7 @@ public class SegmentTreeMain {
     }
 
     private static int query(int left, int right, int num) {
+//        当遇到lazy时将标示下发给子节点
         if (tree[num].lazy != 0) { // 下传懒惰标记
             pushDown(num);
         }
