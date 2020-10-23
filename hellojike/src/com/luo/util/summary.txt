@@ -1,0 +1,230 @@
+
+版本
+lucene          6.0.0
+elasticsearch
+luke            6.0.0   es gui 工具
+    https://github.com/DmitryKey/luke/releases/download/luke-6.0.0/luke-6.0.0-luke-release.zip
+IK分词器
+    http://code.google.com/archive/p/ik-analyzer/downloads
+    https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/ik-analyzer/IK%20Analyzer%202012_u6_source.rar
+Tika    1.13    用于文件类型检测以及文件内容提取
+    https://tika.apache.org/download.html
+    java -jar tika-app-1.13.jar -g
+
+
+StopAnalyzer    停用词分词器
+    通过停用词进行分词
+StandardAnalyzer 标准分词器
+    通过空格和符号进行分割
+
+TextField   会索引，会词条化，不会保存词向量。
+    词向量是指TermVectors,记录每篇文档每个字段每个词的词频，位置，字符偏移量，playload信息
+StringField 会索引，不会词条化，不会保存词向量。
+DocValuesField  当lucene需要聚合或者排序时，会遍历所有字段并进行内部操作。
+    DocValuesField会在索引的基础上，建立一个y已经排序好的Document->Field/Value 的映射列表
+    减轻排序、分组时对内存的依赖。当然也会占用一部分空间。
+IntPoint    索引int类型的值，只是做快速过滤。如果需要显示出来需要另外一个字段储存 ???有点奇怪
+            这是因为IntPoint类型的字段，会将元素添加到PostingList中，如果需要储存需要单独添加一个StoreField类型字段
+
+
+
+5 创建索引
+put blogs
+--创建索引默认5个分片,1个副本。分片数量指定后不能修改，而副本可以
+put blogs
+{
+    "settings":{
+        "number_of_shards":3,
+        "number_of_replicas":1
+    }
+}
+--更改副本数量,以及读写权限
+put blogs/_settings
+{
+    "number_of_replicas":2,
+    "blocks.read_only":true,    //设置当前索引只允许读,不允许更新
+    "blocks.read":true,         //设置当前索引不可读
+    "blocks.write":true         //设置当前索引不可写
+}
+--查看索引
+get blogs/_settings
+get blogs,blog/_settings
+get _all/_settings
+--删除索引
+delete blog
+--打开,关闭索引.关闭的索引几乎不占用资源
+post blogs/_close
+post blogs/_open
+post blog,blogs/_close
+post _all/_close
+----操作不存在的索引会报错 测试发现没有生效?
+post blogg/_close?ignore_unavailable=true
+--复制索引
+post _reindex
+{
+    "source":{"index":"blog"},
+    "dest":{"index":"blog_new"}
+}
+----复制索引时,使用type和query来限制文档
+post _reindex
+{
+    "sourcce":{
+        "index":"blog",
+        "type":"article",
+        "query":{
+            "term":{"title":"git"}
+        }
+    },
+    "desc":{
+        "index":"blog_new"
+    }
+}
+----收缩索引.能将索引分片缩小
+----将索引分片收缩到一个节点上,同时保持该索引只读
+put blogsss/_settings
+{
+    "index.routing.allocation.require._name":"shrink_node_name",
+    "index.blocks.write":true
+}
+----配置新索引的配置
+post blogsss/_shrink/blogsss_new
+{
+    "settings":{
+        "number_of_shards":3,
+        "number_of_replicas":1,
+        "index.codec":"best_compression"
+    },
+    "aliases":{
+        "my_search_indices":{}
+    }
+}
+--索引别名
+----添加别名 actions 可以输入多个
+post /_aliases
+{
+    "actions":[
+        "add":{
+            "index":"test1",
+            "alias":"alias1"
+        }
+    ]
+}
+----移除别名
+post /_aliases
+{
+    "actions":[
+        "remove":{
+            "index":"test1",
+            "alias":"alias1"
+        }
+    ]
+}
+--查看别名
+get /test/_aliases
+--新建文档 指定id
+put /blog/article/1
+{
+    "id":1,
+    "title":"git简介",
+    "posttime":"2017-01-02",
+    "content":"Git是一款开源,免费的分布式版本控制软件"
+}
+--新建文档 不指定id
+post /blog/article
+{
+    "id":1,
+    "title":"git简介",
+    "posttime":"2017-01-02",
+    "content":"Git是一款开源,免费的分布式版本控制软件"
+}
+--获取文档 found表示是否找到,_source表示文档内容
+get /blog/article/1
+--判断是否存在 返回200-ok或者404
+head /blog/article/1
+--获取多个文档 mget api
+get _mget
+{
+    "docs":[
+        {
+            "_index":"blog",
+            "_type":"article",
+            "_id":"1"
+        },
+        {
+            "_index":"blogsss",
+            "_id":"11"
+        }
+    ]
+}
+--更新文档
+----先创建一条文档
+put test/type1/1
+{
+    "counter":1,
+    "tags":["red"]
+}
+----update api修改
+----ctx是脚本语言的一个执行对象 .painless是es内置的脚本语言
+----ctx还可以获取 _index,_type,_id,_version,_routing,_parent等
+----给counter加四
+post /test/type1/1/_update
+{
+    "script":{
+        "inline":"ctx._source.counter+=params.count",
+        "lang":"painless",
+        "params":{
+            "count":4
+        }
+    }
+}
+----给tags数组添加元素
+post /test/type1/1/_update
+{
+    "script":{
+        "inline":"ctx._source.tags.add(params.tag)",
+        "lang":"painless",
+        "params":{
+            "tag":"blue"
+        }
+    }
+}
+----给文档添加一个属性
+post /test/type1/1/_update
+{
+    "script":{
+        "inline":"ctx._source.name=\"luoluoluo\""
+    }
+}
+----给文档删除一个属性
+post /test/type1/1/_update
+{
+    "script":{
+        "inline":"ctx._source.remove(\"name\")"
+    }
+}
+----删除tags数组中含有red的文档
+----ctx.op 表示操作类型,delete表示删除,none表示不操作
+post /test/type1/1/_update
+{
+	"script": {
+		"inline": "if(ctx._source.tags.contains(params.tag)) {ctx.op = \"delete\"}else {ctx.op = \"none\"}",
+		"lang": "painless",
+		"params": {
+			"tag": "red"
+		}
+	}
+}
+----更新还有一个 upsert,表示当存在则更新,不存在则新建一个文档
+post /test/type1/1/_update
+{
+    "script":{
+        "inline":"ctx._source.counter+=params.counter",
+        "lang":"painless",
+        "params":{
+            "counter":4
+        }
+    },
+    "upsert":{
+        "counter":2
+    }
+}
