@@ -228,3 +228,163 @@ post /test/type1/1/_update
         "counter":2
     }
 }
+
+
+--动态映射
+json类型      es类型
+null         不会被添加
+true/false   boolean
+浮点          float
+数字          long
+json对象      object类型
+数组          由数组第一个元素决定
+字符串         可能有date类型(开启日期检测),double,long,text类型,keyword类型
+----测试动态映射
+put /books
+get /books/_mapping
+----此时id被映射成long,publish_date被映射成date,name被映射成text,keyword
+put /books/it/1
+{
+    "id":1,
+    "publish_date":"2017-06-01",
+    "name":"master ElasticSearch"
+}
+----在mapping中可以通过 dynamic 配置动态属性.默认为true,表示自动添加字段.false忽略新字段,strict严格模式,发现新字段抛出错误
+put /books/
+{
+    "mappings":{
+        "it":{
+            "dynamic":"strict",
+            "properties":{
+                "title":{
+                    "type":"text"
+                },
+                "publish_date":{
+                    "type":"date"
+                }
+            }
+        }
+    }
+}
+----日期检测关闭 当新的字段第一次出现的值为时间字符串时,该字段会被配置成日期类型.而第二条文档如果该字段不是日期字符串则会抛错
+----在index的某个type上将date_detection关闭
+put /books
+{
+    "mappings":{
+        "it":{
+            "date_detection":false
+        }
+    }
+}
+----静态映射
+put schools
+{
+    "mappings":{
+        "user":{
+            "_all":{"enabled":false},
+            "properties":{
+                "title":{"type":"text"},
+                "name":{"type":"text"},
+                "age":{"type":"integer"}
+            }
+        },
+        "blogpost":{
+            "_all":{"enabled":true},
+            "properties":{
+                "title":{"type":"text"},
+                "body":{"type":"text"},
+                "user_id":{"type":"keyword"},
+                "create":{
+                    "type":"date",
+                    "format":"strict_date_optional_time||epoch_millis"
+                }
+            }
+        }
+    }
+}
+----字段类型
+        string  es5.x后抛弃此类型,由text和keyword代替
+        text    可以被全文搜索,文本会被分词器分成一个个词项然后索引.text不用于排序,很少用于聚合(termsAggregation除外)
+        keyword 不会对内容进行分词,只能被精确搜索到
+        数字类型 byte,short,integer,long,float,double,half_float,scaled_float
+            对于flaot,half_float,scaled_float来说, -0.0和+0.0是不同的.使用term查询-0.0不会匹配+0.0
+            scaled_float 会将值保存为整数,因为省空间?
+        date    json没有date类型,所以在es中的日期有以下几种类型.
+            格式化的字符串 如 2015-01-01 或者 2015/01/01 12:12:12
+            代表 milliseconds-since-the-epoch 的长整数
+            代表 seconds-since-the-epoch 的长整数.
+            es内部会将日期格式化为UTC,并储存为 milliseconds-since-the-epoch 的长整数.日期格式可以定义,没有自定义则为 strict_date_optional_time||epoch_millis
+        boolean 值为 true,false,"true","false",数字
+        binary  接受base64的编码,默认不存储?(为啥我能查询到),不能被搜索(这个确实)
+        array   默认使用第一个元素的类型,一个数组中的类型必须一致.在文档中使用array类型不需要提前配置.默认支持
+        object  json文档中保存文档.写入es后,文档会被索引成简单的扁平key-value结构.
+        nested
+----数字类型配置
+put number_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "number_of_types":{"type":"integer"},
+                "time_of_types":{"type":"float"},
+                "price":{
+                    "type":"scaled_float",
+                    "scaling_factor":100
+                }
+            }
+        }
+    }
+}
+----binary类型
+put binary_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "name":{"type":"text"},
+                "blob":{"type":"binary"}
+            }
+        }
+    }
+}
+post binary_index/my_type
+{
+    "name":"hello",
+    "blob":"aGVsbG93b3JsZA=="
+}
+----array类型,array的查询
+post binary_index/my_type
+{
+    "name":"hello",
+    "blob":"aGVsbG93b3JsZA==",
+    "messages":["es","java"],
+    "lists":[
+        {"name":"prog_list"},
+        {"name":"cool_list"}
+    ]
+}
+get /binary_index
+{
+    "query":{
+        "match":{
+            "lists.name":"list"
+        }
+    }
+}
+----object mapping
+put object_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "region":{"type":"keyword"},
+                "manager":{
+                    "properties":{
+                        "age":{"type":"integer"},
+                        "name":{"type":"text"}
+                    }
+                }
+            }
+        }
+    }
+}
