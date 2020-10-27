@@ -318,7 +318,9 @@ put schools
         binary  接受base64的编码,默认不存储?(为啥我能查询到),不能被搜索(这个确实)
         array   默认使用第一个元素的类型,一个数组中的类型必须一致.在文档中使用array类型不需要提前配置.默认支持
         object  json文档中保存文档.写入es后,文档会被索引成简单的扁平key-value结构.
-        nested
+        nested  为了避免对象数组之间的关系被消除,进而出现 nested, 这种类型能保证每个对象的独立性
+        range   范围类型
+        token_count 用于统计字符串分词后的词项个数
 ----数字类型配置
 put number_index
 {
@@ -385,6 +387,117 @@ put object_index
                     }
                 }
             }
+        }
+    }
+}
+----但是由于object只是将对象数组偏平化,转成简单列表.所以有时候会有问题
+put object/index
+{
+    "groups":"fans",
+    "user":[
+        {
+            "first":"john",
+            "last":"smith"
+        },{
+            "first":"alice",
+            "last":"white"
+        }
+    ]
+}
+----会被储存成下边的形式,对象数组的对象内容将会失去联系
+{
+    "groups":"fans",
+    "user.first":["john","alice"],
+    "user.last":["smith","white"]
+}
+----以下查询会被搜索到
+get /object_index/my_type/_search
+{
+    "query":{
+        "bool":{
+            "must":[
+                {"match":{"user.first":"alice"}},
+                {"match":{"user.last":"smith"}}
+            ]
+        }
+    }
+}
+----将上述对象修改成 nested .在进行搜索等就搜索不到了
+put object_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "user":{
+                    "type":"nested"
+                }
+            }
+        }
+    }
+}
+----范围类型
+put range_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "expected_attendees":{
+                    "type":"integer_range"
+                },
+                "time_frame":{
+                    "type":"date_range",
+                    "format":"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+                }
+            }
+        }
+    }
+}
+----写入范围
+put range_index/my_type/1
+{
+    "expected_attendees":{
+        "gte":10,
+        "lte":20
+    },
+    "time_frame":{
+        "gte":"2015-02-02 12:00:00",
+        "lte":"2015-09-09"
+    }
+}
+----token_count
+put token_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "name":{
+                    "type":"text",
+                    "fields":{
+                        "length":{
+                            "type":"token_count",
+                            "analyzer":"standard"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+----放入数据 发现并没有储存 name.length字段
+put token_index/my_type
+{
+    "name":"john smith"
+}
+put token_index/my_type
+{
+    "name":"richals tom jerry"
+}
+----搜索 token_count.虽然没有储存token_count字段,但是却可以搜索到
+get token_index/my_type
+{
+    "query":{
+        "term":{
+            "name.length":3
         }
     }
 }
