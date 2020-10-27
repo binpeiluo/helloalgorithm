@@ -559,3 +559,137 @@ get token_index/my_type
         }
     }
 }
+--映射参数
+----analyzer 指定字段的分词器,对索引和查询都有效.
+put analyzer_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "content":{
+                    "type":"text",
+                    "analyzer":"ik_max_word"
+                }
+            }
+        }
+    }
+}
+---- search_analyzer 大多数情况索引和搜索应该指定相同的分词器.确保query解析后和索引的词项是一致的
+---- edge_gram 和 ngram 是es自带的两个分词器.
+---- edge_gram 会从首字开始,按照步长,逐字符分词,直到结尾. 而 ngram 会按照顺序从各个位置开始按照步长,逐字符分词,直到词尾
+---- 具体应用 需要前缀匹配的话, edge_gram是最佳选择,而需要文中任意位置匹配 ngram 更为适合
+---- TODO 算了还不是很懂这一块
+put analyzer_index
+{
+    "settings":{
+        "analysis":{
+            "filter":{
+                "autocomplete_filter":{
+                    "type":"edge_ngram",
+                    "min_gram":1,
+                    "max_gram":20
+                }
+            },
+            "analyzer":{
+                "autocomplete":{
+                    "type":"custom",
+                    "tokenizer":"standard",
+                    "filter":[
+                        "lowercase","autocomplete_filter"
+                    ]
+                }
+            }
+        }
+    },
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "text":{
+                    "type":"text",
+                    "analyzer":"autocomplete",
+                    "search_analyzer":"standard"
+                }
+            }
+        }
+    }
+}
+----写入 倒排索引会有 q qu qui quic quick b br bro brow brown f fo fox
+put /analyzer_index/my_type/1
+{
+    "text":"Quick Brown Fox"
+}
+---- normalizer 用于解析前的标准化配置,比如将所有字符转为小写 下边例子中foo字段在解析前使用自定义的normalizer把字符串标准化为小写
+put /analyzer_index
+{
+    "settings":{
+        "analysis":{
+            "normalizer":{
+                "my_normalizer":{
+                    "type":"custom",
+                    "char_filter":[],
+                    "filter":[
+                        "lowercase","asciifolding"
+                    ]
+                }
+            }
+
+        }
+    },
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "foo":{
+                    "type":"keyword",
+                    "normalizer":"my_normalizer"
+
+                }
+            }
+        }
+    }
+}
+---- boost 设置权重.比如设置关键字在title字段权重是其他子弹的两倍
+put /analyzer_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "title":{
+                    "type":"text",
+                    "boost":2
+                },
+                "context":{
+                    "type":"text"
+                }
+            }
+        }
+    }
+}
+---- 在查询时也可以指定权重
+put /analyzer_index
+{
+    "query":{
+        "match":{
+            "title":{
+                "query":"quick brown fox",
+                "boost":2
+            }
+        }
+    }
+}
+---- coerce 属性用于清除脏数据.默认为true.比如整型字段有可能被写为字符串5 5.0 或者"5" .设置 coerce为false的字段,如果类型不正确则会抛错
+put /analyzer_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "number_one":{
+                    "type":"integer"
+                },
+                "number_two":{
+                    "type":"integer",
+                    "coerce":false
+                }
+            }
+        }
+    }
+}
