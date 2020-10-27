@@ -228,6 +228,64 @@ post /test/type1/1/_update
         "counter":2
     }
 }
+----查询更新 使用update_by_query api
+post /blog/article/_update_by_query
+{
+    "script":{
+        "inline":"ctx._source.category+=params.category",
+        "lang":"painless",
+        "params":{
+            "category":"git"
+        }
+    },
+    "query":{
+        "term":{
+            "title":"git"
+        }
+    }
+}
+----删除文档
+delete /blog/article/1
+----如果索引文档添加了路由,删除时也可以添加路由
+----指定了路由,那么储存的分片将会根据路由确定.对于该文档的查询,没有指定路由将无法查询到
+delete /blog/article/1?routing=user123
+----查询删除 使用 _delete_by_query
+post /blog/article/_delete_by_query
+{
+    "query":{
+        "term":{
+            "title":"java"
+        }
+    }
+}
+----如果需要删除一个索引下的所有文档
+post /blog/article/_delete_by_query
+{
+    "query":{
+        "match_all":{}
+    }
+}
+----批量操作 json文件每一行内容都需要换行
+----注意一次提交的数据量.整个批量操作的内容会被加载到请求节点的内存中
+----一般在5m到15m之间
+curl -XPOST 'localhost:9200/website/_bulk?pretty' --data-binary @data.json
+{"delete":{"_index":"website","_type":"blog","_id":123}}
+{"create":{"_index":"website","_type":"blog","_id":123}}
+{"title":"my first blog here"}
+{"index":{"_index":"website","_type":"blog"}}
+{"title":"my second blog here"}
+{"update":{"_index":"website","_type":"blog","_id":123}}
+{"doc":{"title":"my update blog post"}}
+----版本控制
+----获取某个版本的文档
+get /website/blog/1?version=1
+----指定当文档版本为多少时,才会进行更新
+put /website/blog/123?version=2
+{"title":"xxxx"}
+----指定为外部版本,只有当外部指定的版本比原来版本高才会进行更新
+put /website/blog/123?version=10&version_type=external
+----路由机制,默认使用id作为路由值
+shard=hash(routing) % number_of_primary_shard
 
 
 --动态映射
