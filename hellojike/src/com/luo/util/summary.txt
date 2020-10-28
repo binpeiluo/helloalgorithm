@@ -559,3 +559,76 @@ get token_index/my_type
         }
     }
 }
+
+--元字段
+---- _index,_type,_id,_uid (_uid={type}#{id})
+---- _source,_size
+---- _all,_field_names
+    _all 字段是将所有字段全部拼装在一起,字段之间使用空格隔开.会被解析和索引,但是不会储存
+    _field_names 将所有不为空的字段拼装在一起,会储存??? 通常用于 exists 查询
+---- _parent,_routing
+---- 按照 _index 搜索,分组,排序
+---- 页可以替换成 _type
+get range_index,object_index/_search
+{
+    "query":{
+        "terms":{
+            "_index":["range_index","object_index"]
+        }
+    },
+    "aggs":{
+        "indices":{
+            "terms":{
+                "field":"_index",
+                "size":10
+            }
+        }
+    },
+    "sort":[
+        {"_index":{"order":"asc"}}
+    ]
+}
+----通过 _all 搜索
+get object_index/_search
+{
+    "query":{
+        "match":{
+            "_all":"git"
+        }
+    }
+}
+----通过 _field_names 搜索每个字段不为空的文档
+get object_index/_search
+{
+    "query":{
+        "terms":{
+            "_field_names":["name"]
+        }
+    }
+}
+----配置必须指定路由
+put route_index
+{
+    "mappings":{
+        "my_type":{
+            "_routint":{
+                "required":true
+            }
+        }
+    }
+}
+--映射参数
+----analyzer 分词器
+put analyzer_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "content":{
+                    "type":"text",
+                    "analyzer":"ik_max_word"
+                }
+            }
+        }
+    }
+}
