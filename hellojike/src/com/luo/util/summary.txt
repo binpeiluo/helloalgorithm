@@ -946,4 +946,229 @@ get books/_search
         }
     }
 }
-
+---- terms query 词项查询
+get books/_search
+{
+    "query":{
+        "terms":{
+            "title":["java","python"]
+        }
+    }
+}
+---- range query
+get books/_search
+{
+    "query":{
+        "range":{
+            "price":{
+                "gt":50,
+                "lt":100
+            }
+        }
+    }
+}
+get books/_search
+{
+    "query":{
+        "range":{
+            "publish_time":{
+                "gt":"2007/08/08",
+                "lt":"2020/01/01",
+                "format":"yyyy/mm/dd"
+            }
+        }
+    }
+}
+---- exists query 当字段不为空(null),或者列表含有一个非空值就可以查询到
+get　books/_search
+{
+    "query":{
+        "exists":{
+            "field":"publish_time"
+        }
+    }
+}
+---- prefix query 能查询到包含以固定字符为前缀的关键字的文档
+get books/_search
+{
+    "query":{
+        "prefix":{
+            "description":"win"
+        }
+    }
+}
+---- wildcard query
+get books/_search
+{
+    "query":{
+        "wildcard":{
+            "author":"张*"
+        }
+    }
+}
+---- regexp query 以正则表达式
+get books/_search
+{
+    "query":{
+        "regexp":{
+            "poscode":"W[0-9].+"
+        }
+    }
+}
+---- fuzzy query 模糊查询
+get books/_search
+{
+    "query":{
+        "fuzzy":{
+            "title":"pythno"
+        }
+    }
+}
+--- type query 用于查询某个类型的文档
+get books/_search
+{
+    "query":{
+        "type":{
+            "value":"IT"
+        }
+    }
+}
+---- ids query 用户查询某些id的文档,可以指定type
+get books/_search
+{
+    "query":{
+        "ids":{
+            "type":"IT",
+            "values":[1,3,4]
+        }
+    }
+}
+---- constant_score query 可以包装一个其他类型的查询,然后匹配过滤器的查询条件且具有相同的评分
+get books/_search
+{
+    "query":{
+        "constant_score":{
+            "filter":{
+                "term":{
+                    "title":"java"
+                }
+            },
+            "boost":1.2
+        }
+    }
+}
+---- bool query
+---- must 文档必须匹配must下边的条件
+---- must_not 文档必须不匹配must_not下的条件
+---- should 文档可以匹配should下的条件,也可以不匹配should下的条件.相当于逻辑运算 or
+---- filter 跟must类似,但是这仅起到过滤条件的作用.不参与评分
+---- 查询关键字包含 java,描述可以包含或者不包含虚拟机,并且价格不大于70的文档
+get books/_search
+{
+    "query":{
+        "bool":{
+            "minimum_should_match":1,
+            "must":{
+                "match":{
+                    "title":"java"
+                }
+            },
+            "should":{
+                "match":{
+                    "description":"虚拟机"
+                }
+            },
+            "must_not":{
+                "range":{
+                    "price":{
+                        "gt":70
+                    }
+                }
+            }
+        }
+    }
+}
+--- TODO dis_max query 该查询支持多并发查询,可返回任意查询条件子句匹配的任何文档.  不是很懂
+get books/_search
+{
+    "query":{
+        "dis_max":{
+            "tie_breaker":0.7,
+            "boost":1.2,
+            "queries":[
+                {
+                    "term":{"title":"java"}
+                },{
+                    "term":{"title":"python"}
+                }
+            ]
+        }
+    }
+}
+---- function_score query 通过评分函数得到的评分很高时,可以使用过滤器+自定义评分函数来取代传统评分方式
+---- 以下会返回books索引的所有文档,最大评分为5,每个文档评分随机生成,权重的计算模式为相乘
+get books/_search
+{
+    "query":{
+        "function_score":{
+            "query":{"match_all":{}},
+            "boost":5,
+            "random_score":{},
+            "boost_mode":"multiply"
+        }
+    }
+}
+---- 使用自定义脚本评分,原来分数的十分之一,然后开方  为什么还变大了???
+get books/_search
+{
+    "query":{
+        "function_score":{
+            "query":{"match":{"title":"java"}},
+            "script_score":{
+                "script":{
+                    "inline":"Math.sqrt(doc['price'].value/10)"
+                }
+            }
+        }
+    }
+}
+---- boosting 查询. boosting包含positive,negative,negative_boost三部分.
+---- boosting query会将两个查询封装在一起,并降低其中一个[评分
+---- positive评分保持不变,negative评分降低,negative_boost为抑制系数
+get books/_search
+{
+    "query":{
+        "boosting":{
+            "positive":{
+                "match":{"title":"python"}
+            },
+            "negative":{
+                "range":{
+                    "publish_time":{
+                        "lte":"2015-01-01"
+                    }
+                }
+            },
+            "negative_boost":0.2
+        }
+    }
+}
+---- indices query 用于在多个索引查询.允许指定一个索引列表和内部查询. indices query包含query和no_match_query两部分.query用于搜索指定索引列表的文档.
+---- no_match_query 用于在指定索引列表之外的搜索
+---- 以下在books,bookss索引搜索title包含关键字javascript,在其他索引搜索title包含baskball的文档
+get books/_search
+{
+    "query":{
+        "indices":{
+            "indices":["books","bookss"],
+            "query":{
+                "match":{"title":"javascript"}
+            },
+            "no_match_query":{
+                "term":{
+                    "title":"baskball"
+                }
+            }
+        }
+    }
+}
