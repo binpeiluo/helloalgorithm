@@ -632,3 +632,189 @@ put analyzer_index
         }
     }
 }
+
+--映射参数
+----analyzer 指定字段的分词器,对索引和查询都有效.
+put analyzer_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "content":{
+                    "type":"text",
+                    "analyzer":"ik_max_word"
+                }
+            }
+        }
+    }
+}
+---- search_analyzer 大多数情况索引和搜索应该指定相同的分词器.确保query解析后和索引的词项是一致的
+---- edge_gram 和 ngram 是es自带的两个分词器.
+---- edge_gram 会从首字开始,按照步长,逐字符分词,直到结尾. 而 ngram 会按照顺序从各个位置开始按照步长,逐字符分词,直到词尾
+---- 具体应用 需要前缀匹配的话, edge_gram是最佳选择,而需要文中任意位置匹配 ngram 更为适合
+---- TODO 算了还不是很懂这一块
+put analyzer_index
+{
+    "settings":{
+        "analysis":{
+            "filter":{
+                "autocomplete_filter":{
+                    "type":"edge_ngram",
+                    "min_gram":1,
+                    "max_gram":20
+                }
+            },
+            "analyzer":{
+                "autocomplete":{
+                    "type":"custom",
+                    "tokenizer":"standard",
+                    "filter":[
+                        "lowercase","autocomplete_filter"
+                    ]
+                }
+            }
+        }
+    },
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "text":{
+                    "type":"text",
+                    "analyzer":"autocomplete",
+                    "search_analyzer":"standard"
+                }
+            }
+        }
+    }
+}
+----写入 倒排索引会有 q qu qui quic quick b br bro brow brown f fo fox
+put /analyzer_index/my_type/1
+{
+    "text":"Quick Brown Fox"
+}
+---- normalizer 用于解析前的标准化配置,比如将所有字符转为小写 下边例子中foo字段在解析前使用自定义的normalizer把字符串标准化为小写
+put /analyzer_index
+{
+    "settings":{
+        "analysis":{
+            "normalizer":{
+                "my_normalizer":{
+                    "type":"custom",
+                    "char_filter":[],
+                    "filter":[
+                        "lowercase","asciifolding"
+                    ]
+                }
+            }
+
+        }
+    },
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "foo":{
+                    "type":"keyword",
+                    "normalizer":"my_normalizer"
+
+                }
+            }
+        }
+    }
+}
+---- boost 设置权重.比如设置关键字在title字段权重是其他子弹的两倍
+put /analyzer_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "title":{
+                    "type":"text",
+                    "boost":2
+                },
+                "context":{
+                    "type":"text"
+                }
+            }
+        }
+    }
+}
+---- 在查询时也可以指定权重
+put /analyzer_index
+{
+    "query":{
+        "match":{
+            "title":{
+                "query":"quick brown fox",
+                "boost":2
+            }
+        }
+    }
+}
+---- coerce 属性用于清除脏数据.默认为true.比如整型字段有可能被写为字符串5 5.0 或者"5" .设置 coerce为false的字段,如果类型不正确则会抛错
+put /analyzer_index
+{
+    "mappings":{
+        "my_type":{
+            "properties":{
+                "number_one":{
+                    "type":"integer"
+                },
+                "number_two":{
+                    "type":"integer",
+                    "coerce":false
+                }
+            }
+        }
+    }
+}
+
+--搜索
+----造数据
+PUT books
+{
+  "settings": {
+    "number_of_replicas": 1,
+    "number_of_shards": 3
+  },
+  "mappings": {
+    "IT": {
+      "properties": {
+        "id": {
+          "type": "long"
+        },
+        "title": {
+          "type": "text",
+          "analyzer": "ik_max_word"
+        },
+        "language": {
+          "type": "keyword"
+        },
+        "author": {
+          "type": "keyword"
+        },
+        "price": {
+          "type": "double"
+        },
+        "year": {
+          "type": "date",
+          "format": "yyyy-MM-dd"
+        },
+        "description": {
+          "type": "text",
+          "analyzer": "ik_max_word"
+        }
+      }
+    }
+  }
+}
+{"index":{ "_index": "books", "_type": "IT", "_id": "1" }}
+{"id":"1","title":"Java编程思想","language":"java","author":"Bruce Eckel","price":70.20,"publish_time":"2007-10-01","description":"Java学习必读经典,殿堂级著作！赢得了全球程序员的广泛赞誉。"}
+{"index":{ "_index": "books", "_type": "IT", "_id": "2" }}
+{"id":"2","title":"Java程序性能优化","language":"java","author":"葛一鸣","price":46.50,"publish_time":"2012-08-01","description":"让你的Java程序更快、更稳定。深入剖析软件设计层面、代码层面、JVM虚拟机层面的优化方法"}
+{"index":{ "_index": "books", "_type": "IT", "_id": "3" }}
+{"id":"3","title":"Python科学计算","language":"python","author":"张若愚","price":81.40,"publish_time":"2016-05-01","description":"零基础学python,光盘中作者独家整合开发winPython运行环境，涵盖了Python各个扩展库"}
+{"index":{ "_index": "books", "_type": "IT", "_id": "4" }}
+{"id":"4","title":"Python基础教程","language":"python","author":"Helant","price":54.50,"publish_time":"2014-03-01","description":"经典的Python入门教程，层次鲜明，结构严谨，内容翔实"}
+{"index":{ "_index": "books", "_type": "IT", "_id": "5" }}
+{"id":"5","title":"JavaScript高级程序设计","language":"javascript","author":"Nicholas C. Zakas","price":66.40,"publish_time":"2012-10-01","description":"JavaScript技术经典名著"}
+curl -XPOST "http://173.82.48.12:9200/_bulk?pretty" --data-binary @data.json
