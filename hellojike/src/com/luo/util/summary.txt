@@ -818,3 +818,132 @@ PUT books
 {"index":{ "_index": "books", "_type": "IT", "_id": "5" }}
 {"id":"5","title":"JavaScript高级程序设计","language":"javascript","author":"Nicholas C. Zakas","price":66.40,"publish_time":"2012-10-01","description":"JavaScript技术经典名著"}
 curl -XPOST "http://173.82.48.12:9200/_bulk?pretty" --data-binary @data.json
+
+----词项查询 词项不可以再被分词
+get books/_search
+{
+    "query":{
+        "term":{
+            "title":"思想"
+        }
+    }
+}
+---- 分页处理
+---- 只需要返回指定的字段
+---- 返回version
+---- min_score 最小评分
+---- highlight 高亮处理
+get books/_search
+{
+    "from":0,
+    "size":100,
+    "_source":["title","author","title"],
+    "version":true,
+    "min_score":0.6,
+    "query":{
+        "term":{
+            "title":"思想"
+        }
+    },
+    "highlight":{
+        "fields":{
+            "title":{}
+        }
+    }
+}
+---- match query 全文查询 会将查询内容分词
+get books/_search
+{
+    "query":{
+        "match":{
+            "title":{
+                "query":"java编程思想",
+                "operator":"or"
+            }
+        }
+    }
+}
+---- match_phrase query 该查询会将query内容分词,同时必须按照分词后的顺序依次全部出现在文档中
+get books/_search
+{
+    "query":{
+        "match_phrase":{
+            "title":"java编程思想"
+        }
+    }
+}
+---- match_phrase_prefix query 跟 match_phrase类似,加了可以前缀匹配
+get books/_search
+{
+    "query":{
+        "match_phrase_prefix":{
+            "title":"java编程思*"
+        }
+    }
+}
+---- multi_match query 这个是 match query 的升级版本,用于搜索多个字段.
+---- 支持通配符,可以设置搜索字段的权重.比如title出现的权重时description的三倍
+get books/_search
+{
+    "query":{
+        "multi_match":{
+            "query":"java",
+            "fields":["title^3","description","*_data"]
+        }
+    }
+}
+---- common_terms query 是一种在不牺牲性能的前提下,代替停用词提升搜索准确性和召回率的方案
+---- 一般搜索比如 the brown fox ,query 会被解析成三个term(the ,brown,fox).很明显 the 的 重要
+---- 程度没有其他两个词重要.传统解决方案是将停用词过滤处理,去掉停用词之后可以减小索引大小
+---- 虽然停用词对评分影响不大,但是当停用词在query中有重要意义的时候.
+---- 去掉停用词就无法辨别出类似 happy ,not happy之类的区别
+---- common_terms 提供一种解决方案,它把query分词后的term分为重要词汇(低频)和不重要词汇(高频)
+---- 在搜索时首先用根据重要词汇搜索并计算评分,然后在第二次搜索对评分比较小的高频词汇
+---- 高频词汇不计算所有文档评分,而是只计算第一次搜索出来的文档的评分
+---- 如果只有包含高频词汇,那么会通过and连接符搜索所有词项
+---- 高频还是低频通过 cutoff_frequency 来设置阈值
+---- 低频词汇之间的连接符为 low_freq_operator,高频词汇之间通过 high_freq_operator
+---- 设置低频词汇必须出现,使用如下查询
+get books/_search
+{
+    "query":{
+        "common":{
+            "body":{
+                "query":"nelly the elephant as a cat",
+                "cutoff_frequency":0.01,
+                "low_freq_operator":"and"
+            }
+        }
+    }
+}
+---- 上述搜索等价与
+get books/_search
+{
+    "query":{
+        "bool":{
+            "must":[
+                {"term":{"body":"nelly"}},
+                {"term":{"body":"elephant"}},
+                {"term":{"body":"cat"}}
+            ],
+            "should":[
+                {"term":{"body":"the"}},
+                {"term":{"body":"as"}},
+                {"term":{"body":"a"}}
+            ]
+        }
+    }
+}
+---- simple_query_string
+get books/_search
+{
+    "query":{
+        "simple_query_string":{
+            "query":"\"fried eggs\" + (eggplant | potota) -frittata",
+            "analyzer":"snowball",
+            "fields":["body^5","_all"],
+            "default_operator":"and"
+        }
+    }
+}
+
