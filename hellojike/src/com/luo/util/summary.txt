@@ -1172,3 +1172,243 @@ get books/_search
         }
     }
 }
+-- 嵌套查询,es没有类似于sql join的功能
+---- TODO nested query 没看懂
+---- has_child query
+---- 建立父子关系 branch为父级,employee为子级
+put company
+{
+    "mappings":{
+        "branch":{},
+        "employee":{"_parent":{"type":"branch"}}
+    }
+}
+---- 写入 branch 数据
+curl -XPOST "http://173.82.48.12:9200/company/branch/_bulk?pretty" --data-binary @data.json
+post company/branch/_bulk
+{"index":{"_id":"london"}}
+{"name":"London Westminster","city":"London","country":"UK"}
+{"index":{"_id":"liverpool"}}
+{"name":"Liverpool Central","city":"Liverpool","country":"UK"}
+{"index":{"_id":"paris"}}
+{"name":"Champs Elysees","city":"Paris","country":"France"}
+---- 写入 employee 数据
+curl -XPOST "http://173.82.48.12:9200/company/employee/_bulk?pretty" --data-binary @data.json
+post company/employee/_bulk
+{"index":{"_id":1,"parent":"london"}}
+{"name":"Alice Smith","dob":"1970-10-24","hobby":"hiking"}
+{"index":{"_id":2,"parent":"london"}}
+{"name":"Marks Thomas","dob":"1982-05-16","hobby":"diving"}
+{"index":{"_id":3,"parent":"liverpool"}}
+{"name":"Barry Smith","dob":"1979-04-01","hobby":"hiking"}
+{"index":{"_id":4,"parent":"paris"}}
+{"name":"Adrien Grand","dob":"1987-05-11","hobby":"horses"}
+---- 通过子查询查询父文档记录,需要使用 has_child
+---- 查询1980年后出现员工所在的分支机构
+get company/branch/_search
+{
+    "query":{
+        "has_child":{
+            "type":"employee",
+            "query":{
+                "range":{
+                    "dob":{
+                        "gte":"1980-01-01"
+                    }
+                }
+            }
+        }
+    }
+}
+---- 搜索哪些机构员工名为 Alice Smith.因为使用 match 查询,query会被分词,
+---- 指定 score_mode 为max后才有评分,没有的话都是 1???
+---- 指定 min_children 拥有子文档的最小个数,比如查询至少拥有两个子文档的文档
+get company/branch/_search
+{
+    "query":{
+        "has_child":{
+            "type":"employee",
+            "query":{
+                "match":{
+                    "name":"Alice Smith"
+                }
+            },
+            "score_mode":"max",
+            "min_children":2
+        }
+    }
+}
+---- 跟 has_child类似,在子文档中可以使用 has_parent 查询
+get company/employee/_search
+{
+    "query":{
+        "has_parent":{
+            "parent_type":"branch",
+            "query":{
+                "match":{"country":"UK"}
+            }
+        }
+    }
+}
+
+---- TODO 位置查询
+
+--特殊查询
+---- more_like_this query 用来查询类似文本推荐的场景
+---- fields 是需要匹配的字段,默认是 _all
+---- like 是需要匹配的内容
+---- min_term_freq 是文档中词项的频率,默认是2
+---- max_query_terms query能包含的最大词项数,默认时25
+---- 还有很多参数
+get books/_search
+{
+    "query":{
+        "more_like_this":{
+            "fields":["title","description"],
+            "like":"java virtual machine",
+            "min_term_freq":1,
+            "max_query_terms":12
+        }
+    }
+}
+---- script query 能通过脚本查询
+get books/_search
+{
+    "query":{
+        "bool":{
+            "must":[
+                {
+                    "script":{
+                        "script":{
+                            "inline":"doc['price'].value>80",
+                            "lang":"painless"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
+---- 高亮搜索
+get books/_search
+{
+    "query":{
+        "match":{
+            "title":"javascript"
+        }
+    },
+    "highlight":{
+        "fields":{
+            "title":{
+                "pre_tags":["<strong>"],
+                "post_tags":["</strong>"]
+            }
+        }
+    }
+}
+---- 多字段高亮 将 require_field_match 设为 false
+get books/_search
+{
+    "query":{
+        "match":{"title":"javascript"}
+    },
+    "highlight":{
+        "require_field_match":false,
+        "fields":{
+            "title":{},
+            "description":{}
+        }
+    }
+}
+---- 高亮性能分析
+---- 默认的 highlighter 高亮器,不需要额外的存储空间,需要对_source做二次分析
+---- postings-highlighter 不需要二次分析,但是需要在字段映射中配置 index_options为 offsets.
+        即保存关键字偏移量
+---- fast-vector-highlighter 速度最快,但也最占用空间,需要在 index_options为 with_position_offsets
+        即储存关键字的位置和偏移量
+put example/
+{
+    "mapping":{
+        "doc":{
+            "properties":{
+                "comment":{
+                    "type":"text",
+                    "index_options":"offsets"
+                }
+            }
+        }
+    }
+}
+
+put example/
+{
+    "mapping":{
+        "doc":{
+            "properties":{
+                "comment":{
+                    "type":"text",
+                    "term_vector":"with_positions_offsets"
+                }
+            }
+        }
+    }
+}
+---- 默认排序 默认以评分降序
+get books/_search
+{
+    "query":{
+        "term":{"title":"java"}
+    },
+    "sort":{"_score":"desc"}
+}
+---- 多字段排序
+get books/_search
+{
+    "sort":[
+        {"price":{"order":"desc"}},
+        {"year":{"order":"asc"}},
+    ]
+}
+---- 分片影响评分
+---- 5.4之后 text默认采用BM25评分模型.而不是基于tf-idf空间向量模型.
+---- 评分模型的选择可以通过 similarity参数在映射中指定
+---- 并且es的评分是在每一片分片单独打分的,分片的数量会影响
+---- 建立products索引下product类型的name字段,数据类型为text,分词器为ik_smart,评分模型为tf-idf,索引分片数量为1
+put products
+{
+    "settings":{
+        "number_of_shards":1
+    },
+    "mappings":{
+        "product":{
+            "properties":{
+                "name":{
+                    "type":"text",
+                    "analyzer":"ik_smart",
+                    "similarity":"classic"
+                }
+            }
+        }
+    }
+}
+put products/product/1
+{
+    "name":"柠檬"
+}
+put products/product/2
+{
+    "name":"柠檬汽水"
+}
+put products/product/3
+{
+    "name":"饮料"
+}
+----搜索
+get products/product
+{
+    "query":{
+        "match":{
+            "name":"柠檬"
+        }
+    }
+}
