@@ -10,7 +10,8 @@ IK分词器
 Tika    1.13    用于文件类型检测以及文件内容提取
     https://tika.apache.org/download.html
     java -jar tika-app-1.13.jar -g
-
+Bigdesk 集群监控工具
+    http://github.com/hlstudio/bigdesk.git
 
 StopAnalyzer    停用词分词器
     通过停用词进行分词
@@ -1412,3 +1413,179 @@ get products/product
         }
     }
 }
+
+--聚合分析
+---- max min avg sum
+---- cardinality 类似于sql的distinct计数
+---- stats 一次返回 count,max,min,avg,sum 五个指标
+---- grades_stats 比stats多了平方和,方差,平均差等
+---- percentiles  百分位统计
+---- value_count  计算文档的数量
+get books/_search
+{
+    "size":0,
+    "aggs":{
+        "max_price":{
+            "max":{"field":"price"}
+        }
+    }
+}
+get books/_search
+{
+    "aggs":{
+        "book_price":{
+            "percentiles":{
+                "field":"price"
+            }
+        }
+    }
+}
+get books/_search
+{
+    "size":0,
+    "aggs":{
+        "doc_count":{
+            "value_count":{
+                "field":"author"
+            }
+        }
+    }
+}
+-- 桶聚合
+---- terms aggregation 用于分组聚合
+---- 根据language字段聚合,并统计各编程语言的书籍数量
+get books/_search
+{
+    "aggs":{
+        "per_count":{
+            "terms":{
+                "field":"language"
+            }
+        }
+    }
+}
+---- 在terms aggregation基础之上还可以做指标聚合.例如想统计每一类书的平均价格,可以按照language字段terms aggregation聚合,z再进行 avg aggregation
+get books/_search
+{
+    "aggs":{
+        "per_count":{
+            "terms":{"field":"language"},
+            "aggs":{
+                "avg_price":{
+                    "avg":{"field":"price"}
+                }
+            }
+        }
+    }
+}
+---- filter aggregation 过滤器聚合.可以把符合条件的文档分到一个桶中
+---- 统计title字段包含java的文档的平均价格
+get books/_search
+{
+    "aggs":{
+        "java_filter_price":{
+            "filter":{
+                "term":{"title":"java"}
+            },
+            "aggs":{
+                "avg_price":{
+                    "avg":{"field":"price"}
+                }
+            }
+        }
+    }
+}
+---- filters aggregation 多值过滤器.可以按照多个过滤条件将文档放入到不同的桶中
+---- 对每个query分组后进行分组统计
+get books/_search
+{
+    "aggs":{
+        "per_avg_price":{
+            "filters":{
+                "filters":[
+                    {"match":{"title":"java"}},
+                    {"match":{"title":"python"}}
+                ]
+            },
+            "aggs":{
+                "avg_price":{
+                    "avg":{"field":"price"}
+                }
+            }
+        }
+    }
+}
+---- range aggregation 范围聚合
+get books/_search
+{
+    "aggs":{
+        "price_range":{
+            "range":{
+                "field":"price",
+                "ranges":[
+                    {"to":50},
+                    {"from":50,"to":80},
+                    {"from":80}
+                ]
+            }
+        }
+    }
+}
+---- range aggregation 不止可以在数值字段,也可以在日期字段
+get books/_search
+{
+    "aggs":{
+        "data_range":{
+            "range":{
+                "field":"publish_time",
+                "format":"yyyy-mm-dd",
+                "ranges":[
+                    {"to":"2013-09-01"},
+                    {"from":"2013-09-01","to":"2014-09-01"},
+                    {"from":"2014-09-01"}
+                ]
+            }
+        }
+    }
+}
+---- date range 与 range 的区别在于区间可以使用表达式
+get books/_search
+{
+    "aggs":{
+        "my_date_range":{
+            "date_range":{
+                "field":"publish_time",
+                "ranges":[
+                    {"to":"now-24M/M"},
+                    {"from":"now-24M/M"}
+                ]
+            }
+        }
+    }
+}
+
+--cat api
+---- 索引别名
+get /_cat/aliases?v
+---- 索引分片数量以及占用空间大小
+get /_cat/allocation?v
+---- 查看整个集群文档数量或者某个索引文档数量
+get /_cat/count?v
+get /_cat/count/books?v
+---- 查看当前集群中每个数据节点被 fielddata 所使用的堆内存大小
+get /_cat/fielddata?v
+---- 查看集群健康
+get /_cat/health/?v
+---- 查看索引信息  健康值 分片数量 副本数量 文档数量 占用空间等等
+get /_cat/indices?v
+get /_cat/indices/books?v
+---- 查看master节点信息
+get /_cat/master?v
+
+--cluster api
+---- 当前集群健康信息
+get /_cluster/health
+---- 集群信息
+get /_cluster/state
+---- 集群统计
+get /_cluster/stats
