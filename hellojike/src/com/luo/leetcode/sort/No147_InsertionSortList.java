@@ -15,6 +15,7 @@ package com.luo.leetcode.sort;
 import java.util.Arrays;
 import java.util.List;
 
+@SuppressWarnings("Duplicates")
 public class No147_InsertionSortList {
 
     public ListNode insertionSortListFailed(ListNode head) {
@@ -74,10 +75,14 @@ public class No147_InsertionSortList {
         ListNode cur = head;
         ListNode lat;
 
+//        遍历每一个节点
         while (cur != null) {
+//            lat才是需要插入的值 ?
             lat = cur.next; // 记录下一个要插入排序的值
 
+//            判断curr和lat的大小关系，
             if (lat != null && lat.val < cur.val) {
+//                如果lat小于curr，那么需要找到插入的位置
                 // 只有 cur.next 比 cur 小才需要向前寻找插入点
                 // 寻找插入点，从 pre 开始遍历
                 // （每次都是头节点 h 开始向后遍历，因为单向链表是无法从后往前遍）
@@ -98,6 +103,7 @@ public class No147_InsertionSortList {
                 // 由于每次都是从前往后找插入位置，但是单向链表是无法从后往前遍历，所以需要每次插入完成后要让 pre 复位
                 pre = h;
             } else {
+//                如果lat大于curr，那么进行下一个节点的比较
                 // 都这直接把 cur 指针指向到下一个
                 cur = lat;
             }
@@ -135,12 +141,62 @@ public class No147_InsertionSortList {
         }
     }
 
+    /**
+     * 链表插入排序
+     * @param head
+     * @return
+     */
+    public ListNode insertionSortList2(ListNode head) {
+        if(head==null || head.next==null){
+            return head;
+        }
+//        哨兵节点
+        ListNode tmp=new ListNode(-1);
+        tmp.next=head;
+//        从第二个节点开始遍历
+//        如果没有讲遍历的节点抽取出来，可能会成环
+//        代表遍历节点的前驱节点
+        ListNode front=tmp.next;
+//        代表遍历节点
+        ListNode curr=front.next;
+        while(curr!=null){
+//            保留下个节点
+            ListNode next=curr.next;
+//            判断要插入的节点是否大于前边已经有序的最后一个节点
+            if(front.val<curr.val){
+//                如果是的话，进行下一个元素的比较
+                front=curr;
+                curr=next;
+            } else{
+//                如果不是的话，
+//                  将遍历节点抽取出来
+                front.next=curr.next;
+//                从头开始遍历比较的节点的前驱  方便做插入修改
+                ListNode compareFront=tmp;
+//                找到插入位置
+                while(compareFront.next.val<curr.val){
+                    compareFront=compareFront.next;
+                }
+//                将curr插入其中
+                curr.next=compareFront.next;
+                compareFront.next=curr;
+//                这里curr并不是链表的最后一个节点，所以保存front不变，然后curr去下一个
+                curr=next;
+            }
+        }
+        return tmp.next;
+
+    }
 
     public static void main(String[] args){
         No147_InsertionSortList test=new No147_InsertionSortList();
-        ListNode listNode = generateListNode(Arrays.asList(4, 2, 1, 3));
+//        ListNode listNode = generateListNode(Arrays.asList(4, 2, 1, 3));
+        ListNode listNode = generateListNode(Arrays.asList(1,2,3,4,0));
         print(listNode);
-        ListNode newHead = test.insertionSortListFailed(listNode);
-        print(newHead);
+//        ListNode newHead = test.insertionSortListFailed(listNode);
+//        print(newHead);
+
+        ListNode listNode1 = test.insertionSortList2(listNode);
+        print(listNode1);
     }
 }
