@@ -54,6 +54,27 @@ public class No503_nextGreaterElements {
         return result;
     }
 
+    /**
+     * 模拟两倍数组
+     * @param nums
+     * @return
+     */
+    public int[] nextGreaterElements2(int[] nums) {
+        int len=nums.length;
+        int[] result=new int[len];
+        Stack<Integer> stack=new Stack<>();
+        for (int i = 2*len-1; i >=0 ; i--) {
+            int ri=i%len;
+            int num=nums[ri];
+            while(!stack.isEmpty()&&num>=stack.peek()){
+                stack.pop();
+            }
+            result[ri]=stack.isEmpty()?-1:stack.peek();
+            stack.push(num);
+        }
+        return result;
+    }
+
     public static void main(String[] args) {
         No503_nextGreaterElements test=new No503_nextGreaterElements();
 
@@ -61,5 +82,8 @@ public class No503_nextGreaterElements {
 
         int[] ints = test.nextGreaterElements(nums);
         CommonUtil.display(ints);
+
+        int[] ints1 = test.nextGreaterElements2(nums);
+        CommonUtil.display(ints1);
     }
 }
