@@ -19,147 +19,95 @@ public class TestLruCache {
         }
     }
 
-    /**
-     * 双向链表
-     * 提供删除指定节点,删除头结点,插入尾节点方法
-     */
     static class DoubleList{
+        /*双指针 保存链表头结点和尾节点*/
         private Node head,tail;
-        private int size;
+        private int count;
         DoubleList(){
-            head=new Node(-1,-1);
-            tail=new Node(-1,-1);
-            head.next=tail;
-            tail.prev=head;
-            this.size=0;
+            this.head=new Node(-1,-1);
+            this.tail=new Node(-1,-1);
+            this.count=0;
         }
-
-        public void remove(Node node){
-            node.prev.next=node.next;
-            node.next.prev=node.prev;
-            size--;
+        /**在尾节点添加节点 其他节点被移动到最前面时*/
+        public void addTail(Node t){
+            t.next=tail;
+            t.prev=tail.prev;
+            tail.prev.next=t;
+            tail.prev=t;
+            this.count++;
         }
-
-        public Node removeHead(){
-            Node n = head.next;
-            if(n==tail){
-                return null;
-            }
-            remove(n);
+        /**在链表中删除某节点 该节点一定存在*/
+        private Node removeNode(Node n){
+            n.prev.next=n.next;
+            n.next.prev=n.prev;
+            n.prev=null;
+            n.next=null;
+            this.count--;
             return n;
         }
+        /**此时需要抛弃头结点*/
+        public Node removeFirst(){
+            if(head.next==tail){
+                return null;
+            }else{
+                return removeNode(head.next);
+            }
 
-        public void addTail(Node node){
-            node.prev=tail.prev;
-            node.next=tail;
-            tail.prev.next=node;
-            tail.prev=node;
-            size++;
         }
-        public int size(){
-            return size;
+        /**此时 节点被访问 需要移动到最后边*/
+        public void moveToTail(Node n){
+            removeNode(n);
+            addTail(n);
         }
     }
 
-    static class LruCache{
-        DoubleList list;
-        Map<Integer,Node> map;
-        int capacity;
-        LruCache(int capacity){
-            list=new DoubleList();
-            map=new HashMap<>();
+
+    static class LruCacheEasy{
+        private Map<Integer,Node> map=new HashMap<>();
+        private DoubleList list=new DoubleList();
+        private int capacity;
+        LruCacheEasy(int capacity){
             this.capacity=capacity;
         }
-        public void put(int key,int value){
-            if(map.containsKey(key)){
-                deleteKey(key);
-                addRecently(new Node(key,value));
-            }else{
-                if(list.size()==capacity){
-                    Node node = list.removeHead();
-                    map.remove(node.key);
+        public void put(int key,int val){
+            Node node = map.get(key);
+            if(node==null){
+//                map中不存在
+                if(this.count()==this.capacity){
+                    this.removeNode();
                 }
-                addRecently(new Node(key,value));
+                addNode(node);
+            }else{
+                visitNode(node);
             }
         }
+
         public int get(int key){
-            if(!map.containsKey(key)){
+            Node node = map.get(key);
+            if(node==null){
                 return -1;
             }else{
-                Node node = map.get(key);
-                makeRecently(node);
                 return node.val;
             }
         }
 
-        private void deleteKey(int key){
-            Node node = map.remove(key);
-            list.remove(node);
+        /** 此时访问到节点 需要将元素移动到链表尾部*/
+        private void visitNode(Node n){
+            list.moveToTail(n);
         }
-        private void makeRecently(Node node){
-            list.remove(node);
-            list.addTail(node);
+        private void removeNode(){
+            Node node = list.removeFirst();
+            map.remove(node.key);
         }
-        private void addRecently(Node node){
-            list.addTail(node);
-            map.put(node.key,node);
+        private void addNode(Node n){
+            map.put(n.key,n);
+            list.addTail(n);
         }
-    }
-
-    static class LruCacheEasy{
-        int capacity;
-        LinkedHashMap<Integer,Integer> map;
-        LruCacheEasy(int capacity){
-            this.capacity=capacity;
-            map=new LinkedHashMap<>();
-        }
-        public void put(int key,int val){
-            if(map.containsKey(key)){
-                map.remove(key);
-                map.put(key,val);
-            }else{
-                if(map.size()==capacity){
-                    Integer head = map.keySet().iterator().next();
-                    map.remove(head);
-                }
-                map.put(key,val);
-            }
-        }
-
-        public int get(int key){
-            if(map.containsKey(key)){
-                int value = map.remove(key);
-                map.put(key,value);
-                return value;
-            }else{
-                return -1;
-            }
+        private int count(){
+            return list.count;
         }
     }
 
-    static class LruCacheEasy2{
-        int capacity;
-        LinkedHashMap<Integer,Integer> map;
-        LruCacheEasy2(int capacity){
-            this.capacity=capacity;
-            map=new LinkedHashMap<>(16,0.75f,true);
-        }
-
-        public void put(int key,int value){
-            if(!map.containsKey(key)&&map.size()==capacity){
-                int head = map.keySet().iterator().next();
-                map.remove(head);
-            }
-            map.put(key,value);
-        }
-        public int get(int key){
-            if(map.containsKey(key)){
-                return map.get(key);
-            }else{
-                return -1;
-            }
-        }
-    }
 
     public static void main(String[] args){
 //        LruCache cache=new LruCache(2);
