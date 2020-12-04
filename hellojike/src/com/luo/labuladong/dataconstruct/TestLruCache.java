@@ -26,6 +26,9 @@ public class TestLruCache {
         DoubleList(){
             this.head=new Node(-1,-1);
             this.tail=new Node(-1,-1);
+//            注意这里需要设置为初始状态
+            head.next=tail;
+            tail.prev=head;
             this.count=0;
         }
         /**在尾节点添加节点 其他节点被移动到最前面时*/
@@ -76,8 +79,9 @@ public class TestLruCache {
                 if(this.count()==this.capacity){
                     this.removeNode();
                 }
-                addNode(node);
+                addNode(new Node(key,val));
             }else{
+                node.val=val;
                 visitNode(node);
             }
         }
@@ -87,6 +91,7 @@ public class TestLruCache {
             if(node==null){
                 return -1;
             }else{
+                visitNode(node);
                 return node.val;
             }
         }
@@ -106,6 +111,16 @@ public class TestLruCache {
         private int count(){
             return list.count;
         }
+
+        private void printNode(){
+
+            Node tmp=list.head.next;
+            while(tmp!=list.tail){
+                System.out.print("-> "+tmp.val);
+                tmp=tmp.next;
+            }
+            System.out.println();
+        }
     }
 
 
@@ -115,14 +130,35 @@ public class TestLruCache {
         LruCacheEasy cache=new LruCacheEasy(2);
 
         cache.put(1, 1);
-        cache.put(2, 2);
-        cache.get(1);       // 返回  1
-        cache.put(3, 3);    // 该操作会使得密钥 2 作废
-        cache.get(2);       // 返回 -1 (未找到)
-        cache.put(4, 4);    // 该操作会使得密钥 1 作废
-        cache.get(1);       // 返回 -1 (未找到)
-        cache.get(3);       // 返回  3
-        cache.get(4);       // 返回  4
+        cache.printNode();
 
+        cache.put(2, 2);
+        cache.printNode();
+
+        int i = cache.get(1);// 返回  1
+        System.out.println(i);
+        cache.printNode();
+
+        cache.put(3, 3);    // 该操作会使得密钥 2 作废
+        cache.printNode();
+
+        i = cache.get(2);// 返回 -1 (未找到)
+        System.out.println(i);
+        cache.printNode();
+
+        cache.put(4, 4);    // 该操作会使得密钥 1 作废
+        cache.printNode();
+
+        i=cache.get(1);       // 返回 -1 (未找到)
+        System.out.println(i);
+        cache.printNode();
+
+        i=cache.get(3);       // 返回  3
+        System.out.println(i);
+        cache.printNode();
+
+        i=cache.get(4);       // 返回  4
+        System.out.println(i);
+        cache.printNode();
     }
 }
