@@ -7,6 +7,7 @@ import static com.luo.util.CommonUtil.*;
  * 数据结构系列
  * 反转链表操作
  */
+@SuppressWarnings("Duplicates")
 public class ReverseNode {
 
     /**
@@ -53,12 +54,50 @@ public class ReverseNode {
     public ListNode reverseBetween(ListNode head,int m,int n){
         if(m==1){
             return reverseN(head,n);
+        }else{
+            head.next=reverseBetween(head.next,m-1,n-1);
         }
-        head.next=reverseBetween(head.next,m-1,n-1);
-
         return head;
     }
 
+    /**
+     * 以k个为一组,反转链表
+     * 递归性质
+     * @param head
+     * @param k
+     * @return
+     */
+    public ListNode reverseKGroup(ListNode head,int k){
+        ListNode temp=head;
+//        不足k个则不反转
+        for (int i = 0; i < k; i++) {
+            if(temp==null){
+                return head;
+            }
+            temp=temp.next;
+
+        }
+        ListNode node = reverseBetween(head, temp);
+        head.next=reverseKGroup(temp,k);
+        return node;
+    }
+
+    /**
+     * 反转链表节点[left,right)
+     * @param left
+     * @param right
+     * @return
+     */
+    private ListNode reverseBetween(ListNode left,ListNode right){
+        ListNode curr=left,head=right,next=null;
+        while(curr!=right){
+            next=curr.next;
+            curr.next=head;
+            head=curr;
+            curr=next;
+        }
+        return head;
+    }
 
     public static void main(String[] args) {
         ReverseNode test=new ReverseNode();
@@ -67,8 +106,11 @@ public class ReverseNode {
         CommonUtil.printListNode(head);
         int m=2,n=4;
 
-        head = test.reverseBetween(head, m, n);
-        CommonUtil.printListNode(head);
+//        head = test.reverseBetween(head, m, n);
+//        CommonUtil.printListNode(head);
+
+        ListNode listNode = test.reverseKGroup(head, 2);
+        CommonUtil.printListNode(listNode);
     }
 
 }
