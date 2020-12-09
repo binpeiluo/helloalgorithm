@@ -1,5 +1,9 @@
 package com.luo.labuladong.mind.recurse;
 
+import com.luo.util.CommonUtil;
+
+import java.util.*;
+
 import static com.luo.util.CommonUtil.*;
 /**
  * 递归系列
@@ -238,6 +242,43 @@ public class RecurseMain {
         return root;
     }
 
+    /**
+     * 652. 寻找重复的子树
+     * 给定一棵二叉树，返回所有重复的子树。对于同一类的重复子树，你只需要返回其中任意一棵的根结点即可。
+     * 两棵树重复是指它们具有相同的结构以及相同的结点值。
+     *
+     * 思考对于每个节点需要做什么事情
+     * 遍历的每个节点，判断是否出现过一样的子树，是的话将该节点加入result
+     * 同时，为防止重复，应该稍微处理一下防止相同子树重复
+     *
+     * 另外，关于遍历顺序问题。为了获取本节点的表示，使用后序遍历是比较方便的
+     * @param root
+     * @return
+     */
+    public List<TreeNode> findDuplicateSubtrees(TreeNode root) {
+        traverse(root);
+        return result;
+    }
+
+    Map<String,Integer> memo=new HashMap<>();
+    List<TreeNode> result=new ArrayList<>();
+    private String traverse(TreeNode root){
+        if(root==null){
+            return "#";
+        }
+        String left = traverse(root.left);
+        String right = traverse(root.right);
+//        只有后序遍历才能得到以该节点形成的字符串长啥样
+        String curr=left+"."+right+"."+root.val;
+        Integer freq = memo.getOrDefault(curr, 0);
+
+        if(freq==1){
+            result.add(root);
+        }
+        memo.put(curr,freq+1);
+        return curr;
+    }
+
     public static void main(String[] args) {
         RecurseMain test=new RecurseMain();
 
@@ -245,9 +286,15 @@ public class RecurseMain {
 //        int[] inorder = {9,3,15,20,7};
 //        TreeNode treeNode = test.buildTree(preorder, inorder);
 
-        int[] inorder = {9,3,15,20,7};
-        int[] postorder = {9,15,7,20,3};
-        TreeNode treeNode = test.buildTree2(inorder, postorder);
+//        int[] inorder = {9,3,15,20,7};
+//        int[] postorder = {9,15,7,20,3};
+//        TreeNode treeNode = test.buildTree2(inorder, postorder);
+
+        Integer[] nums={1,2,3,4,null,2,4,null,null,null,null,4};
+        TreeNode root = generateNode(nums);
+        List<TreeNode> duplicateSubtrees = test.findDuplicateSubtrees(root);
+        System.out.println(duplicateSubtrees);
+
 
     }
 
