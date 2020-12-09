@@ -4,6 +4,7 @@ import static com.luo.util.CommonUtil.*;
 /**
  * 递归系列
  */
+@SuppressWarnings("Duplicates")
 public class RecurseMain {
 
     /**
@@ -192,12 +193,61 @@ public class RecurseMain {
         return root;
     }
 
+    /**
+     * 106. 从中序与后序遍历序列构造二叉树
+     * 根据一棵树的中序遍历与后序遍历构造二叉树。
+     * 注意:
+     * 你可以假设树中没有重复的元素。
+     *
+     * 后序遍历可以将数组拆分为 [左子链表部分,右子链表部分,根节点]
+     * 中序遍历可以将数组拆分为 [左子链表部分,根节点,右子链表部分]
+     * @param inorder
+     * @param postorder
+     * @return
+     */
+    public TreeNode buildTree2(int[] inorder, int[] postorder) {
+        return buildTree2(inorder,0,inorder.length-1,
+                postorder,0,postorder.length-1);
+    }
+
+    private TreeNode buildTree2(int[] inorder,int ileft,int iright,
+                                int[] postorder,int pleft,int pright){
+        if(ileft>iright||pleft>pright){
+            return null;
+        }
+        int pIndex=pright;
+        int iIndex=-1;
+        for (int i = ileft; i <=iright ; i++) {
+            if(postorder[pIndex]==inorder[i]){
+                iIndex=i;
+                break;
+            }
+        }
+
+//        中序被分为 [ileft...iIndex-1,iIndex,iIndex+1...iright]
+//        后序被分为 [pleft...pleft+leftLen-1,pleft+leftLen...pIndex-1,pIndex]
+
+        int leftLen=iIndex-ileft;
+        TreeNode root=new TreeNode(postorder[pIndex]);
+        TreeNode left = buildTree2(inorder, ileft, iIndex-1,
+                postorder, pleft, pleft + leftLen - 1);
+        TreeNode right = buildTree2(inorder, iIndex+ 1, iright,
+                postorder, pleft + leftLen, pIndex-1);
+        root.left=left;
+        root.right=right;
+        return root;
+    }
+
     public static void main(String[] args) {
         RecurseMain test=new RecurseMain();
-        int[] preorder = {3,9,20,15,7};
-        int[] inorder = {9,3,15,20,7};
 
-        TreeNode treeNode = test.buildTree(preorder, inorder);
+//        int[] preorder = {3,9,20,15,7};
+//        int[] inorder = {9,3,15,20,7};
+//        TreeNode treeNode = test.buildTree(preorder, inorder);
+
+        int[] inorder = {9,3,15,20,7};
+        int[] postorder = {9,15,7,20,3};
+        TreeNode treeNode = test.buildTree2(inorder, postorder);
 
     }
 
