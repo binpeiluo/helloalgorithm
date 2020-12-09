@@ -141,7 +141,65 @@ public class RecurseMain {
         return root;
     }
 
+    /**
+     * 105. 从前序与中序遍历序列构造二叉树
+     * 根据一棵树的前序遍历与中序遍历构造二叉树。
+     * 注意:
+     * 你可以假设树中没有重复的元素。
+     *
+     * 前序遍历的特点在于根节点在于第一个元素,[根节点,左子节点...部分,右子节点...部分]
+     * 中序遍历的特点在于                    [左子节点...部分,根节点,右子节点...部分]
+     *
+     * 根据这个特点构造
+     * @param preorder
+     * @param inorder
+     * @return
+     */
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        return buildTree(preorder,0,preorder.length-1,
+                inorder,0,inorder.length-1);
+    }
 
+    private TreeNode buildTree(int[] preorder,int pleft,int pright,
+                               int[] inorder,int ileft,int iright){
+        if(pleft>pright){
+            return null;
+        }
+//        二叉树构造在于根节点构造,然后在构造子节点
+
+//        前序遍历的根节点的角标
+        int pIndex=pleft;
+//        后续遍历的根节点的角标
+        int iIndex=-1;
+        for (int i = ileft; i <=iright ; i++) {
+            if(inorder[i]==preorder[pIndex]){
+                iIndex=i;
+                break;
+            }
+        }
+        int leftLen=iIndex-ileft;
+//        将前序数组分成两部分
+//        [pIndex,pIndex+1...pIndex+leftLen,pIndex+leftLen+1,pright]
+//        将后续数组分成两部分
+//        [iIndex...iIndex+leftLen-1,iIndex,iIndex+1...iright]
+        TreeNode root=new TreeNode(preorder[pIndex]);
+        TreeNode left=buildTree(preorder,pIndex+1,pleft+leftLen,
+                inorder,ileft,ileft+leftLen-1);
+        TreeNode right = buildTree(preorder, pleft+leftLen+1, pright,
+                inorder, iIndex + 1, iright);
+        root.left=left;
+        root.right=right;
+        return root;
+    }
+
+    public static void main(String[] args) {
+        RecurseMain test=new RecurseMain();
+        int[] preorder = {3,9,20,15,7};
+        int[] inorder = {9,3,15,20,7};
+
+        TreeNode treeNode = test.buildTree(preorder, inorder);
+
+    }
 
 
 }
