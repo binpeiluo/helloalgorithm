@@ -77,6 +77,36 @@ public class RecurseMain {
         connectTwoNode(left.right,right.left);
     }
 
+    /**
+     * leetcode 114. 二叉树展开为链表
+     *
+     * @param root
+     */
+    public void flatten(TreeNode root) {
+        flattenNode(root);
+    }
+
+    private TreeNode flattenNode(TreeNode root){
+        if(root==null){
+            return null;
+        }
+        TreeNode left=flattenNode(root.left);
+        TreeNode right=flattenNode(root.right);
+
+//        如果左子链表不为空则需要找到链表尾部然后指向右子链表
+//        如果左子链表为空则可以不处理,因为右子链表已经处理了
+        if(left!=null){
+            root.left=null;
+            root.right=left;
+//            找到左子链表尾节点,方便将右子链表置于尾部
+            TreeNode tail=left;
+            while(tail.right!=null){
+                tail=tail.right;
+            }
+            tail.right=right;
+        }
+        return root;
+    }
 
 
 
