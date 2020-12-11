@@ -1,5 +1,9 @@
 package com.luo.labuladong.mind.recurse;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static com.luo.util.CommonUtil.*;
 
 public class BSTMain {
@@ -202,5 +206,54 @@ public class BSTMain {
             root=root.left;
         }
         return root;
+    }
+
+    /**
+     * 297. 二叉树的序列化与反序列化
+     * 序列化是将一个数据结构或者对象转换为连续的比特位的操作，
+     * 进而可以将转换后的数据存储在一个文件或者内存中，
+     * 同时也可以通过网络传输到另一个计算机环境，采取相反方式重构得到原数据。
+     *
+     * 请设计一个算法来实现二叉树的序列化与反序列化。
+     * 这里不限定你的序列 / 反序列化算法执行逻辑，
+     * 你只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。
+     *
+     * @param root
+     * @return
+     */
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        if(root==null){
+            return "#";
+        }
+//        序列化使用的前序
+//        反序列化也是前序
+        String res=String.valueOf(root.val);
+        res+=","+serialize(root.left);
+        res+=","+serialize(root.right);
+        return res;
+    }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        List<String> strings = Arrays.asList(data.split(","));
+        List<String> list=new ArrayList<>(strings);
+        TreeNode root = deserialize(list);
+        return root;
+    }
+
+    private TreeNode deserialize(List<String> datas){
+        if(datas==null||datas.isEmpty()){
+            return null;
+        }
+        String first = datas.remove(0);
+        if("#".equals(first)){
+            return null;
+        }else{
+            TreeNode root=new TreeNode(Integer.valueOf(first));
+            root.left=deserialize(datas);
+            root.right=deserialize(datas);
+            return root;
+        }
     }
 }
