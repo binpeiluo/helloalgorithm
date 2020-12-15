@@ -133,6 +133,101 @@ public class No355_Twitter {
         }
     }
 
+    /**
+     * 前边的解法这是为了解决问题
+     * 并没有根据具体场景设计模块
+     */
+    static class Twitter2{
+        private static int timestamp;
+        private HashMap<Integer,User> userMap=new HashMap<>();
+        private static class Tweet{
+            private int id;
+            private int time;
+            private Tweet next;
+
+            public Tweet(int id, int time) {
+                this.id = id;
+                this.time = time;
+                this.next=null;
+            }
+        }
+        private static class User{
+            private int id;
+            public Set<Integer> followed;
+            public Tweet head;
+
+            public User(int userId) {
+                this.id = userId;
+                this.head=null;
+                this.followed=new HashSet<>();
+                follow(id);
+            }
+            public void follow(int userId){
+                followed.add(userId);
+            }
+            public void post(int tweetId){
+                Tweet tweet=new Tweet(tweetId,timestamp);
+                timestamp++;
+                tweet.next=head;
+                head=tweet;
+            }
+            public void unfollow(int userId){
+                if(userId!=id){
+                    followed.remove(userId);
+                }
+            }
+        }
+        public void postTweet(int userId,int tweetId){
+            if(!userMap.containsKey(userId)){
+                userMap.put(userId,new User(userId));
+            }
+            User user = userMap.get(userId);
+            user.post(tweetId);
+        }
+        public List<Integer> getNewsFeed(int userId){
+            List<Integer> result=new ArrayList<>();
+            if(!userMap.containsKey(userId)){
+                return result;
+            }
+            Set<Integer> followed = userMap.get(userId).followed;
+            PriorityQueue<Tweet> queue=new PriorityQueue<>((t1,t2)->t2.time-t1.time);
+            for (int id:followed){
+                Tweet t=userMap.get(id).head;
+                if(t==null){
+                    continue;
+                }
+                queue.offer(t);
+            }
+            while(!queue.isEmpty()){
+                if(result.size()==10){
+                    break;
+                }
+                Tweet poll = queue.poll();
+                result.add(poll.id);
+                if(poll.next!=null){
+                    queue.add(poll.next);
+                }
+            }
+            return result;
+        }
+        public void follow(int followerId,int followeeId){
+            if(!userMap.containsKey(followerId)){
+                User follower=new User(followerId);
+                userMap.put(followerId,follower);
+            }
+            if(!userMap.containsKey(followeeId)){
+                User followee=new User(followeeId);
+                userMap.put(followeeId,followee);
+            }
+            userMap.get(followerId).follow(followeeId);
+        }
+        public void unfollow(int followerId,int followeeId){
+            if(userMap.containsKey(followerId)){
+                userMap.get(followerId).unfollow(followeeId);
+            }
+        }
+    }
+
     public static void main(String[] args){
 //        Twitter twitter=new Twitter();
 //        twitter.postTweet(1,5);
