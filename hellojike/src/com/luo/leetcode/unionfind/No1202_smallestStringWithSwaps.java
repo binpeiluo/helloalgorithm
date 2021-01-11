@@ -1,7 +1,6 @@
 package com.luo.leetcode.unionfind;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * 1202. 交换字符串中的元素
@@ -44,19 +43,47 @@ import java.util.List;
 public class No1202_smallestStringWithSwaps {
 
     public String smallestStringWithSwaps(String s, List<List<Integer>> pairs) {
-        UnionFind un=new UnionFind(pairs.size());
+//        索引对的联通分量
+        UnionFind un=new UnionFind(s.length());
         for (List<Integer> item:pairs){
             un.union(item.get(0),item.get(1));
         }
 
-        return "";
+//        将联通分量对应的字符串保存起来,排序即可
+        Map<Integer,List<Character>> map=new HashMap<>();
+        for (int i = 0,len=s.length(); i <len; i++) {
+            int root = un.root(i);
+            if(map.containsKey(root)){
+                map.get(root).add(s.charAt(i));
+            }else{
+                List<Character> orDefault = map.getOrDefault(root, new ArrayList<>());
+                orDefault.add(s.charAt(i));
+                map.put(root,orDefault);
+            }
+        }
 
+//        排序
+        for(Map.Entry<Integer,List<Character>> entry:map.entrySet()){
+            entry.getValue().sort(Comparator.naturalOrder());
+        }
 
-
+        String result="";
+//        输出
+        for (int i = 0,len=s.length(); i < len; i++) {
+            int root = un.root(s.charAt(i));
+            Character remove = map.get(root).remove(0);
+            result+=remove;
+        }
+        return result;
     }
 
     public static void main(String[] args) {
+        No1202_smallestStringWithSwaps test=new No1202_smallestStringWithSwaps();
 
+        String s = "dcab";
+        List<List<Integer>> pairs = Arrays.asList(Arrays.asList(0,3),Arrays.asList(1,2));
+        String s1 = test.smallestStringWithSwaps(s, pairs);
+        System.out.println(s1);
     }
 
     static class UnionFind{
@@ -89,6 +116,9 @@ public class No1202_smallestStringWithSwaps {
             return root(m)==root(n);
         }
         public int root(int m){
+            while(parent[m]!=m){
+                m=parent[m];
+            }
             return m;
         }
     }
