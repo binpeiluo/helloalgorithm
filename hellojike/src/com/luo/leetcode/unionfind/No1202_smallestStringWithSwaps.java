@@ -70,7 +70,7 @@ public class No1202_smallestStringWithSwaps {
         String result="";
 //        输出
         for (int i = 0,len=s.length(); i < len; i++) {
-            int root = un.root(s.charAt(i));
+            int root = un.root(i);
             Character remove = map.get(root).remove(0);
             result+=remove;
         }
@@ -80,10 +80,27 @@ public class No1202_smallestStringWithSwaps {
     public static void main(String[] args) {
         No1202_smallestStringWithSwaps test=new No1202_smallestStringWithSwaps();
 
-        String s = "dcab";
-        List<List<Integer>> pairs = Arrays.asList(Arrays.asList(0,3),Arrays.asList(1,2));
+//        String s = "dcab";
+//        List<List<Integer>> pairs = Arrays.asList(Arrays.asList(0,3),Arrays.asList(1,2));
+
+//        String s = "dcab";
+//        List<List<Integer>> pairs = Arrays.asList(
+//                Arrays.asList(0,3),
+//                Arrays.asList(1,2),
+//                Arrays.asList(0,2)
+//        );
+
+        String s="cba";
+        List<List<Integer>> pairs = Arrays.asList(
+          Arrays.asList(0,1),
+          Arrays.asList(1,2)
+        );
+
+
         String s1 = test.smallestStringWithSwaps(s, pairs);
         System.out.println(s1);
+
+
     }
 
     static class UnionFind{
@@ -94,7 +111,9 @@ public class No1202_smallestStringWithSwaps {
             this.capicity=capicity;
             this.parent=new int[capicity];
             this.rank=new int[capicity];
-            Arrays.fill(parent,1);
+            for (int i = 0; i < capicity; i++) {
+                parent[i]=i;
+            }
             Arrays.fill(rank,1);
         }
 
