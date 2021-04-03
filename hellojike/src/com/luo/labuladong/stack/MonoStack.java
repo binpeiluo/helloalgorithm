@@ -42,11 +42,67 @@ public class MonoStack {
         return result;
     }
 
+    /**
+     * 变形 假设数组是环形的
+     * 可以将数组扩大为两倍来计算
+     * 更优雅的方式 可以使用 % 来模拟
+     * @param nums
+     * @return
+     */
+    int[] nextGreaterElement2(int[] nums){
+        int len=nums.length;
+        int[] result=new int[len];
+        Stack<Integer> stack=new Stack<>();
+        for (int i = len*2-1; i >=0 ; i--) {
+            int curr=nums[i%len];
+            while(!stack.isEmpty()&&curr>=stack.peek()){
+                stack.pop();
+            }
+            result[i%len]=stack.isEmpty()?-1:stack.peek();
+            stack.push(curr);
+        }
+        return result;
+    }
+
+
+    /**
+     * 给你一个数组T，这个数组存放的是近几天的天气气温，你返回一个等长的数组，
+     * 计算：对于每一天，你还要至少等多少天才能等到一个更暖和的气温；如果等不到那一天，填 0
+     *
+     * 其实就是前边的变形 将单调栈储存的元素从元素值修改成元素角标
+     * @param nums
+     * @return
+     */
+    int[] dailyTemperatures(int[] nums){
+        int len=nums.length;
+        int[] result=new int[len];
+        Stack<Integer> stack=new Stack<>();
+        for (int i = len-1; i >=0 ; i--) {
+            int curr=nums[i];
+            while(!stack.isEmpty()&&curr>=nums[stack.peek()]){
+                stack.pop();
+            }
+            result[i]=stack.isEmpty()?0:(stack.peek()-i);
+            stack.push(i);
+        }
+        return result;
+    }
+
+
+
     public static void main(String[] args) {
         MonoStack test=new MonoStack();
         int[] nums = {2,1,2,4,3};
 
         int[] ints = test.nextGreaterElement(nums);
         CommonUtil.display(ints);
+
+        int[] ints2 = test.nextGreaterElement2(nums);
+        CommonUtil.display(ints2);
+
+        int[] t={73,74,75,71,69,76};
+        int[] ints1 = test.dailyTemperatures(t);
+        CommonUtil.display(ints1);
+
     }
 }
