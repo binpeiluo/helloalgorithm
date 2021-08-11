@@ -67,11 +67,35 @@ public class No413_numberOfArithmeticSlices {
         return res;
     }
 
+    /**
+     * 动态规划
+     * 核心思想
+     *      dp[i] 表示已nums[i]为结尾的子数组组成等差数组长度, 如果 i+1 能组成子数组
+     * @param nums
+     * @return
+     */
+    public int numberOfArithmeticSlices3(int[] nums) {
+        int len=nums.length;
+        if(len<2){
+            return 0;
+        }
+        int[] dp=new int[len];
+        int result=0;
+        for (int i = 2; i < len; i++) {
+            if(nums[i]-nums[i-1]==nums[i-1]-nums[i-2]){
+                dp[i]=dp[i-1]+1;
+                result+=dp[i];
+            }
+        }
+        return result;
+    }
+
     public static void main(String[] args) {
         No413_numberOfArithmeticSlices test=new No413_numberOfArithmeticSlices();
         int[] nums={1,2,3,4,5,6};
         int i = test.numberOfArithmeticSlices(nums);
         int i2 = test.numberOfArithmeticSlices2(nums);
-        System.out.printf("i=%d, i2=%d", i, i2);
+        int i3 = test.numberOfArithmeticSlices3(nums);
+        System.out.printf("i=%d, i2=%d, i3=%d", i, i2, i3);
     }
 }
