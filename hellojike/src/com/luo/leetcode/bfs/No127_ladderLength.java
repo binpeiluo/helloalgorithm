@@ -1,6 +1,6 @@
 package com.luo.leetcode.bfs;
 
-import javafx.util.Pair;
+//import javafx.util.Pair;
 
 import java.util.*;
 
@@ -376,26 +376,26 @@ public class No127_ladderLength {
                     }
                 }
         );
-        Queue<Pair<String,Integer>> queue=new LinkedList<>();
-        Map<String,Boolean> visited=new HashMap<>();
-        queue.offer(new Pair<>(beginWord,1));
-        visited.put(beginWord,true);
-        while(!queue.isEmpty()){
-            Pair<String, Integer> poll = queue.poll();
-            String word = poll.getKey();
-            Integer level = poll.getValue();
-            for (int i = 0; i < strLen; i++) {
-                String newWord=word.substring(0,i)+"*"+word.substring(i+1,strLen);
-                for(String adjustWord:allCompoMap.getOrDefault(newWord,new ArrayList<>())){
-                    if(adjustWord.equals(endWord))
-                        return level+1;
-                    if(!visited.containsKey(adjustWord)){
-                        queue.offer(new Pair<>(adjustWord,level+1));
-                        visited.put(adjustWord,true);
-                    }
-                }
-            }
-        }
+//        Queue<Pair<String,Integer>> queue=new LinkedList<>();
+//        Map<String,Boolean> visited=new HashMap<>();
+//        queue.offer(new Pair<>(beginWord,1));
+//        visited.put(beginWord,true);
+//        while(!queue.isEmpty()){
+//            Pair<String, Integer> poll = queue.poll();
+//            String word = poll.getKey();
+//            Integer level = poll.getValue();
+//            for (int i = 0; i < strLen; i++) {
+//                String newWord=word.substring(0,i)+"*"+word.substring(i+1,strLen);
+//                for(String adjustWord:allCompoMap.getOrDefault(newWord,new ArrayList<>())){
+//                    if(adjustWord.equals(endWord))
+//                        return level+1;
+//                    if(!visited.containsKey(adjustWord)){
+//                        queue.offer(new Pair<>(adjustWord,level+1));
+//                        visited.put(adjustWord,true);
+//                    }
+//                }
+//            }
+//        }
         return 0;
     }
 

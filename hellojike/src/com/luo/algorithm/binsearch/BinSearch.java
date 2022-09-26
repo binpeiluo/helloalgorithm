@@ -31,28 +31,55 @@ public class BinSearch {
 
     /**
      * 查询数组中第一个等于target的元素角标
+     * 两种写法 搜索区间为 [left, len(array)-1] 和 [left, len(array))
+     * 这两种搜索区间写法不一样
+     * 当搜索区间为[left, len(array)-1]时
+     *      根据mid元素的大小和target的关系划分搜索区间 [left, mid-1], mid, [mid+1, right]
+     * 当搜索区间为[left, len(array))时
+     *      根据mid元素的大小和target的关系划分搜索区间 [left, mid), mid, [mid+1, right)
      *
+     *
+     * 结束循环条件时left角标可以视为数组中小于target的元素个数
      * @param nums   数组
      * @param target 目标元素
      * @return 第一个等于target的元素角标
      */
-    public int leftBound(int[] nums, int target) {
-        int lo = 0, hi = nums.length - 1;
-        while (lo <= hi) {
-            int mid = lo + (hi - lo) / 2;
-            if (nums[mid] < target) {
-                lo = mid + 1;
-            } else if (nums[mid] > target) {
-                hi = mid - 1;
-            } else {// nums[mid]=target
-                if (mid == 0||nums[mid - 1] !=target ) //第一个元素或者前一个元素不等于target
-                    return mid;
-                else {
-                    hi = mid - 1;
-                }
+    public int leftBound_v1(int[] nums, int target) {
+        int left = 0, right = nums.length;
+//        退出循环条件为 left =right   left的取值范围是[0, len(nums)]
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target){
+                right = mid;
+            }else if (nums[mid] > target){
+                right = mid;
+            }else if (nums[mid] < target){
+                left = mid + 1;
             }
         }
-        return -1;
+        if (left == nums.length){
+            return -1;
+        }
+        return nums[left]==target?left:-1;
+    }
+
+    public int leftBound_v2(int[] nums, int target) {
+        int left=0, right=nums.length-1;
+//        结束循环条件为right>left, left取值为[0, len(nums)]
+        while(left<=right){
+            int mid=left+(right-left)/2;
+            if (nums[mid]==target){
+                right=mid-1;
+            }else if (nums[mid]<target){
+                left=mid+1;
+            }else if (nums[mid]>target){
+                right=mid-1;
+            }
+        }
+        if(left==nums.length){
+            return -1;
+        }
+        return nums[left]==target?left:-1;
     }
 
 
@@ -66,7 +93,9 @@ public class BinSearch {
         Arrays.sort(ints);
 
         int eleIndex = search.binSearch(ints, target);
-//        int eleIndex = search.leftBound(ints, target);
+        int eleIndexV1 = search.leftBound_v1(ints, target);
+        int eleIndexV2 = search.leftBound_v2(ints, target);
+        System.out.printf("eleIndex=%d, eleIndexV1=%d, eleIndexV2=%d\n", eleIndex, eleIndexV1, eleIndexV2);
         BinSearch.printMessage(ints, target, eleIndex);
     }
 
