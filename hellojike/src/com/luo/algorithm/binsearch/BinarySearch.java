@@ -129,10 +129,56 @@ public class BinarySearch {
 
     }
 
+    // 搜索左侧边界
+    public int leftBound3(int[] a, int target){
+        // [left, right)
+        int left=0, right=a.length;
+        // 退出条件是 left=right 此时[left, left)不包括任何值
+        // 可为啥left就代表小于target的元素个数呢?
+        // 想明白了, 如果mid元素等于target, 其角标就是前边元素的个数 前边可能也有等于target的元素, 那么边界值就是mid
+        while(left < right){
+            int mid = left + (right-left)/2;
+            // [left, mid) mid [mid+1, right)
+            if(a[mid] == target){
+                right = mid;
+            }else if(a[mid] < target){
+                left = mid +1;
+            }else if(a[mid] > target){
+                right = mid;
+            }
+        }
+        if(left == a.length || a[left] != target) {
+            return -1;
+        }
+        return left;
+    }
+
+    public int rightBound3(int[] a, int target){
+        int left=0, right=a.length;
+        // [left, right) 退出条件是left=right
+        // 小于等于target的元素个数
+        while(left < right){
+            // [left, mid) mid [mid+1, right)
+            int mid = left + (right - left) / 2;
+            if(a[mid] == target){
+                left = mid + 1;
+            }else if(a[mid] < target){
+                left = mid + 1;
+            }else if(a[mid] > target){
+                right = mid;
+            }
+        }
+        // 思考为啥要-1 因为left是小于等于target的元素个数 left对应元素肯定不等于target
+        if(left == 0 || a[left-1] != target){
+            return -1;
+        }
+        return left-1;
+    }
+
     public static void main(String[] args){
         BinarySearch test=new BinarySearch();
-        int[] nums={1,2,2,2,3,4,4,6};
-        int target=4;
+        int[] nums={1,2,2,2,3,3,4,4,6};
+        int target= 3;
         int i = test.binarySearch(nums, target);
         System.out.println("二分查找:"+i);
 
@@ -142,10 +188,16 @@ public class BinarySearch {
         int i2 = test.leftBound2(nums, target);
         System.out.println("left bound2 第一个等于target == "+i2);
 
+        i2 = test.leftBound2(nums, target);
+        System.out.println("left bound3 第一个等于target == "+i2);
+
         int i3 = test.rightBound(nums, target);
         System.out.println("right bound 最后一个等于target =="+i3);
 
         int i4 = test.rightBound2(nums, target);
         System.out.println("right bound2 最后一个等于target=="+i4);
+
+        i4 = test.rightBound3(nums, target);
+        System.out.println("right bound3 最后一个等于target=="+i4);
     }
 }
