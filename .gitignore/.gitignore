@@ -22,7 +22,7 @@ hs_err_pid*
 .idea/
 .iml
 target/
-out
+out/
 gen
 
 # gradle 项目忽略的文件
@@ -36,7 +36,3 @@ gradle-app.setting
 .gradletasknamecache
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
-
-/out/
-/.idea/
-helloalgorithm.iml
